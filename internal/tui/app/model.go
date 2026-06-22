@@ -12,6 +12,7 @@ import (
 	"github.com/superposition/kotoba-line/internal/content"
 	"github.com/superposition/kotoba-line/internal/game"
 	statestore "github.com/superposition/kotoba-line/internal/state"
+	"github.com/superposition/kotoba-line/internal/station"
 	coretransition "github.com/superposition/kotoba-line/internal/transition"
 	"github.com/superposition/kotoba-line/internal/tui/atoms"
 	tuitransition "github.com/superposition/kotoba-line/internal/tui/transition"
@@ -30,15 +31,28 @@ var playableContentFiles = []string{
 type screenMode string
 
 const (
-	modeDrill screenMode = "drill"
-	modeBoss  screenMode = "boss"
+	modeDrill    screenMode = "drill"
+	modeBoss     screenMode = "boss"
+	modeStations screenMode = "stations"
 )
 
 type Options struct {
 	Username        string
 	Library         *content.Library
+	StationCatalog  *station.Catalog
 	EventLogPath    string
 	DisableEventLog bool
+}
+
+type levelOption struct {
+	LevelID     string
+	LevelTitle  string
+	StationName string
+	Description string
+	CardCount   int
+	Required    []content.Card
+	Missing     []content.Card
+	Locked      bool
 }
 
 type Model struct {
@@ -46,11 +60,13 @@ type Model struct {
 	width    int
 	height   int
 	library  *content.Library
+	stations *station.Catalog
 	mode     screenMode
 	drill    game.Drill
 	boss     boss.Fight
 	levelID  string
 	level    string
+	cursor   int
 	input    string
 	last     string
 	hint     string
@@ -68,6 +84,7 @@ func New(opts Options) Model {
 	}
 
 	library := opts.Library
+	stations := opts.StationCatalog
 	loadErr := ""
 	if library == nil {
 		loaded, report, err := loadPlayableContent()
@@ -79,10 +96,17 @@ func New(opts Options) Model {
 			library = loaded
 		}
 	}
+	if stations == nil {
+		loaded, report, err := loadStationCatalog()
+		if err == nil && !report.HasErrors() {
+			stations = loaded
+		}
+	}
 
 	model := Model{
 		username: username,
 		library:  library,
+		stations: stations,
 		mode:     modeDrill,
 		drill:    newLevelDrill(library, starterLevelID),
 		boss:     boss.NewFight(newDocumentBoss(library)),
@@ -107,25 +131,54 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case drillTickMsg:
-		m.drill = m.drill.Tick()
+		if m.mode == modeDrill {
+			m.drill = m.drill.Tick()
+		}
 		return m, drillTick()
 	case tea.KeyMsg:
+		if m.mode == modeStations && msg.Type == tea.KeyRunes && msg.String() != "q" {
+			m = m.handleStationRunes(msg.Runes)
+			return m, nil
+		}
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "s":
+			m = m.openStations()
 		case "b":
 			m = m.enterBoss()
 		case "c":
 			m = m.switchLevel(constitutionLevelID)
 		case "j":
-			m = m.switchLevel(starterLevelID)
+			if m.mode == modeStations {
+				m = m.moveStationCursor(1)
+			} else {
+				m = m.switchLevel(starterLevelID)
+			}
+		case "k":
+			if m.mode == modeStations {
+				m = m.moveStationCursor(-1)
+			} else if msg.Type == tea.KeyRunes {
+				m.input += string(msg.Runes)
+				m.last = ""
+			}
+		case "up":
+			if m.mode == modeStations {
+				m = m.moveStationCursor(-1)
+			}
+		case "down":
+			if m.mode == modeStations {
+				m = m.moveStationCursor(1)
+			}
 		case "esc":
 			m.mode = modeDrill
 			m.input = ""
 			m.hint = ""
 			m.bossHint = ""
 		case "enter":
-			if m.mode == modeBoss {
+			if m.mode == modeStations {
+				m = m.selectStation()
+			} else if m.mode == modeBoss {
 				m = m.submitBossInput()
 			} else {
 				m = m.submitInput()
@@ -133,7 +186,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "backspace", "ctrl+h":
 			m.input = trimLastRune(m.input)
 		case "?", "？":
-			if m.mode == modeBoss {
+			if m.mode == modeStations {
+				m.last = "select with enter"
+			} else if m.mode == modeBoss {
 				m = m.showBossHint()
 			} else {
 				m = m.showHint()
@@ -151,6 +206,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m Model) handleStationRunes(runes []rune) Model {
+	for _, r := range runes {
+		switch r {
+		case 'j':
+			m = m.moveStationCursor(1)
+		case 'k':
+			m = m.moveStationCursor(-1)
+		case 's':
+			m = m.openStations()
+		case '?', '？':
+			m.last = "select with enter"
+		}
+	}
+	return m
+}
+
 func (m Model) View() string {
 	width := m.cardWidth()
 	lines := []string{
@@ -163,6 +234,8 @@ func (m Model) View() string {
 
 	if m.loadErr != "" {
 		lines = append(lines, "", m.loadErr)
+	} else if m.mode == modeStations {
+		lines = append(lines, "", m.stationsCard(width))
 	} else if m.mode == modeBoss {
 		if m.scene != "" {
 			lines = append(lines, "", m.scene)
@@ -229,9 +302,56 @@ func (m Model) showHint() Model {
 	return m
 }
 
+func (m Model) openStations() Model {
+	m.mode = modeStations
+	m.input = ""
+	m.hint = ""
+	m.bossHint = ""
+	options := m.levelOptions()
+	m.cursor = indexLevelOption(options, m.levelID)
+	m.last = "STATION SELECT"
+	return m
+}
+
+func (m Model) moveStationCursor(delta int) Model {
+	options := m.levelOptions()
+	if len(options) == 0 {
+		m.cursor = 0
+		return m
+	}
+	m.cursor += delta
+	if m.cursor < 0 {
+		m.cursor = len(options) - 1
+	}
+	if m.cursor >= len(options) {
+		m.cursor = 0
+	}
+	return m
+}
+
+func (m Model) selectStation() Model {
+	options := m.levelOptions()
+	if len(options) == 0 {
+		m.last = "no stations"
+		return m
+	}
+	option := options[boundedIndex(m.cursor, len(options))]
+	if option.Locked {
+		m.last = fmt.Sprintf("LOCKED %s", option.LevelTitle)
+		return m
+	}
+	return m.switchLevel(option.LevelID)
+}
+
 func (m Model) switchLevel(levelID string) Model {
 	if m.library == nil {
 		m.last = "level unavailable"
+		return m
+	}
+	if option, ok := m.levelOption(levelID); ok && option.Locked {
+		m.mode = modeStations
+		m.cursor = indexLevelOption(m.levelOptions(), levelID)
+		m.last = fmt.Sprintf("LOCKED %s", option.LevelTitle)
 		return m
 	}
 	drill := newLevelDrill(m.library, levelID)
@@ -243,6 +363,7 @@ func (m Model) switchLevel(levelID string) Model {
 	m.drill = drill
 	m.levelID = levelID
 	m.level = levelTitle(m.library, levelID, levelID)
+	m.cursor = indexLevelOption(m.levelOptions(), levelID)
 	m.input = ""
 	m.hint = ""
 	m.bossHint = ""
@@ -316,7 +437,7 @@ func (m *Model) appendEvent(event statestore.Event) {
 func (m Model) drillCard(width int) string {
 	body := []string{
 		fmt.Sprintf("HIT %02d  MISS %02d  HINT %02d", m.drill.Hits(), m.drill.Misses(), m.drill.Hints()),
-		"c constitution  j starter  b boss  ?/？ hint  q quit",
+		"s stations  c constitution  j starter  b boss  ?/？ hint  q quit",
 	}
 
 	enemies := m.drill.Enemies()
@@ -353,6 +474,118 @@ func (m Model) drillCard(width int) string {
 		Body:     body,
 		Width:    width,
 	})
+}
+
+func (m Model) stationsCard(width int) string {
+	options := m.levelOptions()
+	body := []string{
+		"enter travel  j/down next  k/up prev  esc drill  q quit",
+	}
+	if len(options) == 0 {
+		body = append(body, "no stations")
+	} else {
+		cursor := boundedIndex(m.cursor, len(options))
+		for i, option := range options {
+			prefix := " "
+			if i == cursor {
+				prefix = ">"
+			}
+			status := "OPEN"
+			if option.Locked {
+				status = "LOCKED"
+			}
+			name := option.StationName
+			if name == "" {
+				name = option.LevelTitle
+			}
+			body = append(body, fmt.Sprintf("%s %02d %-6s %s", prefix, i+1, status, name))
+			body = append(body, fmt.Sprintf("    %s  cards:%d", option.LevelTitle, option.CardCount))
+			if option.Locked {
+				body = append(body, "    needs:")
+				for _, requirement := range requirementLines(option.Missing) {
+					body = append(body, "      "+requirement)
+				}
+			}
+		}
+	}
+	if m.last != "" {
+		body = append(body, m.last)
+	}
+	if m.logErr != "" {
+		body = append(body, "log: "+m.logErr)
+	}
+
+	return atoms.Card(atoms.CardSpec{
+		Title:     "STATIONS",
+		Subtitle:  "Kotoba Line",
+		Body:      body,
+		Footer:    "locked stations show required cards",
+		Width:     width,
+		Highlight: true,
+	})
+}
+
+func (m Model) levelOption(levelID string) (levelOption, bool) {
+	for _, option := range m.levelOptions() {
+		if option.LevelID == levelID {
+			return option, true
+		}
+	}
+	return levelOption{}, false
+}
+
+func (m Model) levelOptions() []levelOption {
+	if m.library == nil {
+		return nil
+	}
+	progress := m.progress()
+	cardIndex := indexContentCards(m.library.Cards)
+	options := make([]levelOption, 0, len(m.library.Levels))
+	for _, level := range m.library.Levels {
+		option := levelOption{
+			LevelID:     level.ID,
+			LevelTitle:  firstNonBlank(level.Title, level.ID),
+			StationName: m.stationNameForLevel(level.ID),
+			Description: level.Description,
+			CardCount:   len(level.CardIDs),
+		}
+		for _, cardID := range level.RequiredCardIDs {
+			card, ok := cardIndex[cardID]
+			if !ok {
+				continue
+			}
+			option.Required = append(option.Required, card)
+			if !progress.Cards[cardID].Mastered {
+				option.Missing = append(option.Missing, card)
+			}
+		}
+		option.Locked = len(option.Missing) > 0
+		options = append(options, option)
+	}
+	return options
+}
+
+func (m Model) stationNameForLevel(levelID string) string {
+	if m.stations == nil {
+		return ""
+	}
+	for _, st := range m.stations.Stations {
+		if st.LevelID == levelID {
+			return st.Name
+		}
+	}
+	return ""
+}
+
+func (m Model) progress() statestore.Progress {
+	if m.eventLog.Path() == "" {
+		return statestore.NewProgress()
+	}
+	progress, err := m.eventLog.Replay()
+	if err != nil {
+		return statestore.NewProgress()
+	}
+	return progress
 }
 
 func (m Model) bossCard(width int) string {
@@ -534,6 +767,19 @@ func loadPlayableContentFile(name string) (*content.Library, content.ValidationR
 	return nil, content.ValidationReport{}, lastErr
 }
 
+func loadStationCatalog() (*station.Catalog, station.ValidationReport, error) {
+	candidates := contentFileCandidates(filepath.Join("stations", "catalog.json"))
+	var lastErr error
+	for _, candidate := range candidates {
+		catalog, report, err := station.LoadFile(candidate)
+		if err == nil {
+			return catalog, report, nil
+		}
+		lastErr = err
+	}
+	return nil, station.ValidationReport{}, lastErr
+}
+
 func contentFileCandidates(name string) []string {
 	candidates := []string{filepath.Join("content", name)}
 	wd, err := os.Getwd()
@@ -598,4 +844,54 @@ func levelTitle(library *content.Library, levelID, fallback string) string {
 		}
 	}
 	return fallback
+}
+
+func indexContentCards(cards []content.Card) map[string]content.Card {
+	index := make(map[string]content.Card, len(cards))
+	for _, card := range cards {
+		index[card.ID] = card
+	}
+	return index
+}
+
+func indexLevelOption(options []levelOption, levelID string) int {
+	for i, option := range options {
+		if option.LevelID == levelID {
+			return i
+		}
+	}
+	return 0
+}
+
+func boundedIndex(index, length int) int {
+	if length <= 0 {
+		return 0
+	}
+	if index < 0 {
+		return 0
+	}
+	if index >= length {
+		return length - 1
+	}
+	return index
+}
+
+func requirementLines(cards []content.Card) []string {
+	if len(cards) == 0 {
+		return []string{"none"}
+	}
+	lines := make([]string, 0, len(cards))
+	for _, card := range cards {
+		lines = append(lines, fmt.Sprintf("%s/%s", card.Text, card.Reading.Kana))
+	}
+	return lines
+}
+
+func firstNonBlank(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
 }

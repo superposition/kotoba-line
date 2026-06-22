@@ -40,3 +40,28 @@ Deferred:
   - press `？` to reveal the kana hint;
   - answer `にほんこくみんは`;
   - press `j` to return to the starter deck.
+
+## Issue #16 Closeout Notes
+
+The station selector is the second Wave 004 slice.
+
+Completed:
+
+- `s` opens the station selector.
+- `j`/`down` and `k`/`up` move through station levels.
+- Enter travels to the selected open station.
+- Locked stations stay visible and list missing prerequisite cards.
+- Repeated movement keys such as `jjjj` are handled when terminals batch them
+  into one key event.
+
+Validation:
+
+- `go test ./internal/tui/app`
+- `go test ./...`
+- `git diff --check`
+- local SSH smoke:
+  - opened `s`;
+  - selected Constitution Gate with repeated `j` movement and Enter;
+  - reopened `s`;
+  - selected locked Emperor Symbol / Article 1;
+  - verified missing prerequisites render as separate readable lines.
