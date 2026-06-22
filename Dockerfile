@@ -38,6 +38,7 @@ chmod +x /usr/local/bin/kotoba-railway-start
 EOF
 
 COPY --from=build /out/kotoba-ssh /app/kotoba-ssh
+COPY content /app/content
 
 VOLUME ["/data"]
 EXPOSE 2222/tcp
