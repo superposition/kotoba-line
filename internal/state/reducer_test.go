@@ -11,12 +11,15 @@ import (
 func TestReplayDeterminism(t *testing.T) {
 	events := []Event{
 		LevelUnlocked("station-01"),
+		BossIntro("boss-a"),
 		HintRevealed("card-a", "kana"),
 		EnemyHit("card-a"),
+		BossDamaged("boss-a", "card-a"),
 		EnemyMissed("card-a"),
 		EnemyHit("card-a"),
 		EnemyHit("card-a"),
 		EnemyHit("card-a"),
+		BossCleared("boss-a"),
 		CardMastered("card-b"),
 	}
 
@@ -163,9 +166,12 @@ func TestEventLogAppendReadAndReplay(t *testing.T) {
 	log := NewEventLog(path)
 	events := []Event{
 		LevelUnlocked("station-01"),
+		BossIntro("boss-a"),
+		EnemyHit("card-a"),
+		BossDamaged("boss-a", "card-a"),
 		EnemyHit("card-a"),
 		EnemyHit("card-a"),
-		EnemyHit("card-a"),
+		BossCleared("boss-a"),
 	}
 
 	for _, event := range events {

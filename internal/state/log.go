@@ -129,6 +129,17 @@ func ValidateEvent(event Event) error {
 		if event.LevelID == "" {
 			return fmt.Errorf("%s event requires level_id", event.Type)
 		}
+	case EventBossIntro, EventBossCleared:
+		if event.BossID == "" {
+			return fmt.Errorf("%s event requires boss_id", event.Type)
+		}
+	case EventBossDamaged:
+		if event.BossID == "" {
+			return fmt.Errorf("%s event requires boss_id", event.Type)
+		}
+		if event.CardID == "" {
+			return fmt.Errorf("%s event requires card_id", event.Type)
+		}
 	default:
 		return fmt.Errorf("unknown event type %q", event.Type)
 	}
