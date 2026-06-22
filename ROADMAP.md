@@ -8,6 +8,19 @@ Each ticket must follow:
 - [Definition of Done](./docs/DEFINITION_OF_DONE.md)
 - [Agentic Phases](./docs/AGENTIC_PHASES.md)
 
+GitHub issue queue:
+
+- [#1 SSH App Skeleton](https://github.com/superposition/kotoba-line/issues/1)
+- [#2 Content And Card Model](https://github.com/superposition/kotoba-line/issues/2)
+- [#3 Transactional State](https://github.com/superposition/kotoba-line/issues/3)
+- [#4 Ocean Arcade TUI Atoms](https://github.com/superposition/kotoba-line/issues/4)
+- [#5 Kana Input Shooter Loop](https://github.com/superposition/kotoba-line/issues/5)
+- [#6 Skill Tree And Mastery](https://github.com/superposition/kotoba-line/issues/6)
+- [#7 Document Import And Constitution Campaign](https://github.com/superposition/kotoba-line/issues/7)
+- [#8 Boss Fights And Fadeaways](https://github.com/superposition/kotoba-line/issues/8)
+- [#9 Station MIDI Hooks](https://github.com/superposition/kotoba-line/issues/9)
+- [#10 Railway SSH Deployment](https://github.com/superposition/kotoba-line/issues/10)
+
 ## 1. SSH App Skeleton
 
 Create the Go project, Wish SSH server, password auth, Bubble Tea session boot,
