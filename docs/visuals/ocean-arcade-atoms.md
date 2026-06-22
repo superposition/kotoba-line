@@ -11,9 +11,12 @@ them without owning layout math:
 - `Flash`, `Storyboard`, and `OceanStoryboard` for arcade transition beats.
 - `MapSmoke`, `CardSmoke`, `DrillSmoke`, and `JoinedSmoke` for placeholder
   screen inspection.
+- `internal/transition` for replayable queued scene definitions covering card
+  mastery, station arrival, boss intro, boss crack, and level clear.
+- `internal/tui/transition` for deterministic NES/ocean frame rendering over
+  those queued scenes.
 
 Palette coverage is ANSI terminal-native: ocean blue, seafoam, cyan, yellow,
 coral, white, and deep navy. Tests strip ANSI before checking visible widths, so
 kana and kanji like `日`, `日本`, and `かな` remain readable in fixed-width
 frames.
-

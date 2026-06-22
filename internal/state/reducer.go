@@ -69,6 +69,9 @@ func (p *Progress) Apply(event Event) error {
 		p.Cards[event.CardID] = card
 	case EventLevelUnlocked:
 		p.UnlockedLevels[event.LevelID] = true
+	case EventBossIntro, EventBossDamaged, EventBossCleared:
+		// Boss events are replayed by transition views; progression is tracked by
+		// the underlying card hit and level unlock events.
 	}
 
 	return nil

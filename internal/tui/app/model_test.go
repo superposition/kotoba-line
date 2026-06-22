@@ -119,6 +119,77 @@ func TestKanaActionsAppendStateEvents(t *testing.T) {
 	}
 }
 
+func TestBossModeDamagesBossAndRendersTransition(t *testing.T) {
+	model := New(Options{Library: testLibrary(), DisableEventLog: true})
+	startHP := model.boss.HP()
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'b'}})
+	if cmd != nil {
+		t.Fatalf("Update(b) returned command, want nil")
+	}
+	model = updated.(Model)
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{"BOSS", "BOSS INTRO", "target 日が暮れる"} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("boss view missing %q:\n%s", want, view)
+		}
+	}
+
+	updated, _ = model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("ひがくれる")})
+	model = updated.(Model)
+	updated, _ = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	model = updated.(Model)
+
+	if model.boss.HP() != startHP-1 {
+		t.Fatalf("boss HP = %d, want %d", model.boss.HP(), startHP-1)
+	}
+	view = atoms.StripANSI(model.View())
+	for _, want := range []string{"BOSS CRACK", "BOSS HIT 日が暮れる -1 HP"} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("boss hit view missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestBossModeAppendsReplayableStateEvents(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	model := New(Options{Library: testLibrary(), EventLogPath: path})
+
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'b'}})
+	model = updated.(Model)
+	updated, _ = model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}})
+	model = updated.(Model)
+	for !model.boss.Cleared() {
+		updated, _ = model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("ひがくれる")})
+		model = updated.(Model)
+		updated, _ = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+		model = updated.(Model)
+	}
+
+	events, err := statestore.NewEventLog(path).ReadAll()
+	if err != nil {
+		t.Fatalf("read event log: %v", err)
+	}
+	if len(events) != 9 {
+		t.Fatalf("event count = %d, want 9: %#v", len(events), events)
+	}
+	if events[0].Type != statestore.EventBossIntro || events[0].BossID != "journal-2026-06-22-boss" {
+		t.Fatalf("first event = %#v, want boss intro", events[0])
+	}
+	if events[1].Type != statestore.EventHintRevealed || events[1].CardID != "phrase-hi-ga-kureru" {
+		t.Fatalf("second event = %#v, want boss hint", events[1])
+	}
+	if events[2].Type != statestore.EventEnemyHit || events[2].Clean == nil || *events[2].Clean {
+		t.Fatalf("first boss hit should be unclean after hint: %#v", events[2])
+	}
+	if events[len(events)-1].Type != statestore.EventBossCleared {
+		t.Fatalf("last event = %#v, want boss cleared", events[len(events)-1])
+	}
+	if !strings.Contains(atoms.StripANSI(model.View()), "LEVEL CLEAR") {
+		t.Fatalf("clear view missing LEVEL CLEAR:\n%s", model.View())
+	}
+}
+
 func testLibrary() *content.Library {
 	return &content.Library{
 		Cards: []content.Card{
@@ -136,6 +207,14 @@ func testLibrary() *content.Library {
 				Reading:  content.Reading{Kana: "にほん", RomajiHint: "nihon"},
 				Meaning:  "Japan",
 				Type:     content.CardTypeWord,
+				Playable: true,
+			},
+			{
+				ID:       "phrase-hi-ga-kureru",
+				Text:     "日が暮れる",
+				Reading:  content.Reading{Kana: "ひがくれる", RomajiHint: "hi ga kureru"},
+				Meaning:  "the sun sets",
+				Type:     content.CardTypePhrase,
 				Playable: true,
 			},
 		},

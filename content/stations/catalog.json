@@ -1,0 +1,42 @@
+{
+  "stations": [
+    {
+      "id": "tide-gate",
+      "number": 1,
+      "name": "Tide Gate",
+      "line": "Kotoba Line",
+      "level_id": "journal-2026-06-22-key-readings",
+      "description": "Opening station for the 日 reading drill.",
+      "visual_pulse": {
+        "enabled": true,
+        "bpm": 96,
+        "pattern": "tide",
+        "color": "cyan",
+        "accent_every": 4
+      },
+      "midi_hooks": [
+        {
+          "id": "tide-gate-local",
+          "label": "Tide Gate local MIDI",
+          "path": "assets/midi/tide-gate.local.mid",
+          "source": "local-placeholder",
+          "optional": true,
+          "visual_pulse": {
+            "enabled": true,
+            "bpm": 96,
+            "pattern": "tide",
+            "color": "cyan",
+            "accent_every": 4
+          },
+          "notes": [
+            "Placeholder registration path only; add a rights-cleared local file before enabling MIDI playback."
+          ]
+        }
+      ],
+      "tags": [
+        "seed",
+        "opening"
+      ]
+    }
+  ]
+}
