@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "campaign_id": "constitution-preamble-article1",
+  "document_id": "jp-constitution",
+  "title": {
+    "ja": "日本国憲法: 前文と第一条",
+    "en": "Constitution: Preamble and Article 1"
+  },
+  "document_fixture": "content/documents/japan-constitution-preamble-article1.json",
+  "status": "prep_fixture",
+  "source_notes": [
+    {
+      "source": "e-Gov Law Search",
+      "url": "https://laws.e-gov.go.jp/law/321CONSTITUTION",
+      "api_url": "https://laws.e-gov.go.jp/api/1/lawdata/321CONSTITUTION",
+      "retrieved_on": "2026-06-22"
+    },
+    {
+      "source": "Japanese Law Translation",
+      "url": "https://www.japaneselawtranslation.go.jp/en/laws/view/174/ja",
+      "retrieved_on": "2026-06-22"
+    }
+  ],
+  "reading_review_flags": [
+    {
+      "flag": "needs_native_review",
+      "scope": "all learner_kana and romaji_hint fields",
+      "reason": "Readings are learner hints for issue prep and should be reviewed before marking cards playable."
+    },
+    {
+      "flag": "official_historical_kana_preserved",
+      "surfaces": ["わたつて", "ないやうに", "あつて", "基く"],
+      "reason": "The document fixture keeps official orthography; learner kana uses modern pronunciation hints where useful."
+    },
+    {
+      "flag": "particle_pronunciation",
+      "surfaces": ["日本国民は", "これは"],
+      "reason": "Surface は is pronounced わ when used as a topic particle."
+    },
+    {
+      "flag": "legal_register",
+      "surfaces": ["存する", "総意", "詔勅", "排除する"],
+      "reason": "Formal/legal vocabulary should be confirmed for target learner level and gloss precision."
+    }
+  ],
+  "levels": [
+    {
+      "level_id": "constitution-preamble-1",
+      "document_section_id": "preamble-1",
+      "title": {
+        "ja": "前文 第一段",
+        "en": "Preamble, paragraph 1"
+      },
+      "station": "constitution-gate",
+      "official_text_ref": "content/documents/japan-constitution-preamble-article1.json#sections/preamble-1/official_text",
+      "prerequisite_cards": [
+        {
+          "card_id": "card:日本国民",
+          "surface": "日本国民",
+          "learner_kana": "にほんこくみん",
+          "review": "needs_native_review"
+        },
+        {
+          "card_id": "card:国会",
+          "surface": "国会",
+          "learner_kana": "こっかい",
+          "review": "needs_native_review"
+        },
+        {
+          "card_id": "card:主権",
+          "surface": "主権",
+          "learner_kana": "しゅけん",
+          "review": "needs_native_review"
+        },
+        {
+          "card_id": "card:憲法",
+          "surface": "憲法",
+          "learner_kana": "けんぽう",
+          "review": "needs_native_review"
+        }
+      ],
+      "learner_hints": [
+        {
+          "surface": "日本国民は",
+          "learner_kana": "にほんこくみんは",
+          "romaji_hint": "nihon-kokumin wa",
+          "meaning_hint": "the Japanese people",
+          "review_flags": ["particle_pronunciation"]
+        },
+        {
+          "surface": "正当に選挙された",
+          "learner_kana": "せいとうに せんきょされた",
+          "romaji_hint": "seitou ni senkyo sareta",
+          "meaning_hint": "duly elected",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "国会",
+          "learner_kana": "こっかい",
+          "romaji_hint": "kokkai",
+          "meaning_hint": "National Diet",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "主権",
+          "learner_kana": "しゅけん",
+          "romaji_hint": "shuken",
+          "meaning_hint": "sovereign power",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "基く",
+          "learner_kana": "もとづく",
+          "romaji_hint": "motozuku",
+          "meaning_hint": "to be based on",
+          "review_flags": ["official_historical_kana_preserved", "legal_register"]
+        },
+        {
+          "surface": "詔勅",
+          "learner_kana": "しょうちょく",
+          "romaji_hint": "shouchoku",
+          "meaning_hint": "imperial rescripts",
+          "review_flags": ["legal_register"]
+        }
+      ]
+    },
+    {
+      "level_id": "constitution-article-1",
+      "document_section_id": "article-1",
+      "title": {
+        "ja": "第一条 象徴天皇",
+        "en": "Article 1, Symbol of the State"
+      },
+      "station": "emperor-symbol",
+      "official_text_ref": "content/documents/japan-constitution-preamble-article1.json#sections/article-1/official_text",
+      "prerequisite_cards": [
+        {
+          "card_id": "card:第一条",
+          "surface": "第一条",
+          "learner_kana": "だいいちじょう",
+          "review": "needs_native_review"
+        },
+        {
+          "card_id": "card:天皇",
+          "surface": "天皇",
+          "learner_kana": "てんのう",
+          "review": "needs_native_review"
+        },
+        {
+          "card_id": "card:象徴",
+          "surface": "象徴",
+          "learner_kana": "しょうちょう",
+          "review": "needs_native_review"
+        },
+        {
+          "card_id": "card:総意",
+          "surface": "総意",
+          "learner_kana": "そうい",
+          "review": "needs_native_review"
+        }
+      ],
+      "learner_hints": [
+        {
+          "surface": "第一条",
+          "learner_kana": "だいいちじょう",
+          "romaji_hint": "dai-ichi-jou",
+          "meaning_hint": "Article 1",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "天皇",
+          "learner_kana": "てんのう",
+          "romaji_hint": "tennou",
+          "meaning_hint": "the Emperor",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "象徴",
+          "learner_kana": "しょうちょう",
+          "romaji_hint": "shouchou",
+          "meaning_hint": "symbol",
+          "review_flags": []
+        },
+        {
+          "surface": "日本国民統合",
+          "learner_kana": "にほんこくみん とうごう",
+          "romaji_hint": "nihon-kokumin tougou",
+          "meaning_hint": "unity of the Japanese people",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "あつて",
+          "learner_kana": "あって",
+          "romaji_hint": "atte",
+          "meaning_hint": "and being",
+          "review_flags": ["official_historical_kana_preserved"]
+        },
+        {
+          "surface": "存する",
+          "learner_kana": "そんする",
+          "romaji_hint": "son suru",
+          "meaning_hint": "to reside; to exist",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "総意",
+          "learner_kana": "そうい",
+          "romaji_hint": "soui",
+          "meaning_hint": "general will; consensus",
+          "review_flags": ["legal_register"]
+        },
+        {
+          "surface": "基く",
+          "learner_kana": "もとづく",
+          "romaji_hint": "motozuku",
+          "meaning_hint": "to be based on",
+          "review_flags": ["official_historical_kana_preserved", "legal_register"]
+        }
+      ]
+    }
+  ]
+}

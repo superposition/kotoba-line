@@ -1,0 +1,664 @@
+{
+  "cards": [
+    {
+      "id": "journal-2026-06-22-hi",
+      "text": "日",
+      "kanji": "日",
+      "reading": {
+        "kana": "ひ",
+        "romaji_hint": "hi"
+      },
+      "meaning": "sun; day",
+      "type": "kanji_reading",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "notes": [
+        "Native reading used for the sun/day sense."
+      ],
+      "tags": [
+        "日",
+        "core"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-nichi",
+      "text": "日",
+      "kanji": "日",
+      "reading": {
+        "kana": "にち",
+        "romaji_hint": "nichi"
+      },
+      "meaning": "day",
+      "type": "kanji_reading",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "日",
+        "core"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-bi",
+      "text": "日",
+      "kanji": "日",
+      "reading": {
+        "kana": "び",
+        "romaji_hint": "bi"
+      },
+      "meaning": "day, as in weekday words",
+      "type": "kanji_reading",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "日",
+        "weekday"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-ka",
+      "text": "日",
+      "kanji": "日",
+      "reading": {
+        "kana": "か",
+        "romaji_hint": "ka"
+      },
+      "meaning": "date counter in some dates",
+      "type": "kanji_reading",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "日",
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-nihon",
+      "text": "日本",
+      "kanji": "日本",
+      "reading": {
+        "kana": "にほん",
+        "romaji_hint": "nihon"
+      },
+      "meaning": "Japan",
+      "type": "word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "country",
+        "core"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-nippon",
+      "text": "日本",
+      "kanji": "日本",
+      "reading": {
+        "kana": "にっぽん",
+        "romaji_hint": "nippon"
+      },
+      "meaning": "Japan",
+      "type": "word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "country",
+        "alternate-reading"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-honjitsu",
+      "text": "本日",
+      "kanji": "本日",
+      "reading": {
+        "kana": "ほんじつ",
+        "romaji_hint": "honjitsu"
+      },
+      "meaning": "today; formal",
+      "type": "word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "time",
+        "formal"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-mainichi",
+      "text": "毎日",
+      "kanji": "毎日",
+      "reading": {
+        "kana": "まいにち",
+        "romaji_hint": "mainichi"
+      },
+      "meaning": "every day",
+      "type": "word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#key-readings",
+      "tags": [
+        "time",
+        "core"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-tsuitachi",
+      "text": "1日",
+      "kanji": "1日",
+      "reading": {
+        "kana": "ついたち",
+        "romaji_hint": "tsuitachi"
+      },
+      "meaning": "first day of the month",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-futsuka",
+      "text": "2日",
+      "kanji": "2日",
+      "reading": {
+        "kana": "ふつか",
+        "romaji_hint": "futsuka"
+      },
+      "meaning": "second day of the month; two days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-mikka",
+      "text": "3日",
+      "kanji": "3日",
+      "reading": {
+        "kana": "みっか",
+        "romaji_hint": "mikka"
+      },
+      "meaning": "third day of the month; three days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-yokka",
+      "text": "4日",
+      "kanji": "4日",
+      "reading": {
+        "kana": "よっか",
+        "romaji_hint": "yokka"
+      },
+      "meaning": "fourth day of the month; four days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-itsuka",
+      "text": "5日",
+      "kanji": "5日",
+      "reading": {
+        "kana": "いつか",
+        "romaji_hint": "itsuka"
+      },
+      "meaning": "fifth day of the month; five days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-muika",
+      "text": "6日",
+      "kanji": "6日",
+      "reading": {
+        "kana": "むいか",
+        "romaji_hint": "muika"
+      },
+      "meaning": "sixth day of the month; six days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-nanoka",
+      "text": "7日",
+      "kanji": "7日",
+      "reading": {
+        "kana": "なのか",
+        "romaji_hint": "nanoka"
+      },
+      "meaning": "seventh day of the month; seven days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-youka",
+      "text": "8日",
+      "kanji": "8日",
+      "reading": {
+        "kana": "ようか",
+        "romaji_hint": "youka / yoka"
+      },
+      "meaning": "eighth day of the month; eight days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-kokonoka",
+      "text": "9日",
+      "kanji": "9日",
+      "reading": {
+        "kana": "ここのか",
+        "romaji_hint": "kokonoka"
+      },
+      "meaning": "ninth day of the month; nine days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-tooka",
+      "text": "10日",
+      "kanji": "10日",
+      "reading": {
+        "kana": "とおか",
+        "romaji_hint": "tooka"
+      },
+      "meaning": "tenth day of the month; ten days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-juuichi-nichi",
+      "text": "11日",
+      "kanji": "11日",
+      "reading": {
+        "kana": "じゅういちにち",
+        "romaji_hint": "juuichi-nichi"
+      },
+      "meaning": "eleventh day of the month",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-hatsuka",
+      "text": "20日",
+      "kanji": "20日",
+      "reading": {
+        "kana": "はつか",
+        "romaji_hint": "hatsuka"
+      },
+      "meaning": "twentieth day of the month; twenty days",
+      "type": "date",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#date-readings",
+      "tags": [
+        "date"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-ototoi",
+      "text": "一昨日",
+      "kanji": "一昨日",
+      "reading": {
+        "kana": "おととい",
+        "romaji_hint": "ototoi"
+      },
+      "meaning": "day before yesterday",
+      "type": "time_word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#time-words",
+      "tags": [
+        "time"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-kinou",
+      "text": "昨日",
+      "kanji": "昨日",
+      "reading": {
+        "kana": "きのう",
+        "romaji_hint": "kinou"
+      },
+      "meaning": "yesterday",
+      "type": "time_word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#time-words",
+      "tags": [
+        "time"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-kyou",
+      "text": "今日",
+      "kanji": "今日",
+      "reading": {
+        "kana": "きょう",
+        "romaji_hint": "kyou"
+      },
+      "meaning": "today",
+      "type": "time_word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#time-words",
+      "tags": [
+        "time",
+        "core"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-ashita",
+      "text": "明日",
+      "kanji": "明日",
+      "reading": {
+        "kana": "あした",
+        "romaji_hint": "ashita"
+      },
+      "meaning": "tomorrow",
+      "type": "time_word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#time-words",
+      "tags": [
+        "time",
+        "core"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-asatte",
+      "text": "明後日",
+      "kanji": "明後日",
+      "reading": {
+        "kana": "あさって",
+        "romaji_hint": "asatte"
+      },
+      "meaning": "day after tomorrow",
+      "type": "time_word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#time-words",
+      "tags": [
+        "time"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-yokujitsu",
+      "text": "翌日",
+      "kanji": "翌日",
+      "reading": {
+        "kana": "よくじつ",
+        "romaji_hint": "yokujitsu"
+      },
+      "meaning": "the next day",
+      "type": "time_word",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#time-words",
+      "tags": [
+        "time",
+        "formal"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-nichiyoubi",
+      "text": "日曜日",
+      "kanji": "日曜日",
+      "reading": {
+        "kana": "にちようび",
+        "romaji_hint": "nichiyoubi"
+      },
+      "meaning": "Sunday",
+      "type": "weekday",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#practice",
+      "tags": [
+        "weekday"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-nippori",
+      "text": "日暮里",
+      "kanji": "日暮里",
+      "reading": {
+        "kana": "にっぽり",
+        "romaji_hint": "nippori"
+      },
+      "meaning": "Nippori",
+      "type": "place_name",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#notes",
+      "notes": [
+        "Special place-name reading."
+      ],
+      "tags": [
+        "place-name",
+        "special-reading"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-kasugachou",
+      "text": "春日町",
+      "kanji": "春日町",
+      "reading": {
+        "kana": "かすがちょう",
+        "romaji_hint": "kasugachou"
+      },
+      "meaning": "Kasuga-cho",
+      "type": "place_name",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#notes",
+      "notes": [
+        "Special reading using 日 in 春日."
+      ],
+      "tags": [
+        "place-name",
+        "special-reading"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-hi-ga-kureru",
+      "text": "日が暮れる",
+      "kanji": "日が暮れる",
+      "reading": {
+        "kana": "ひがくれる",
+        "romaji_hint": "hi ga kureru"
+      },
+      "meaning": "the sun sets; it gets dark",
+      "type": "phrase",
+      "playable": true,
+      "needs_review": false,
+      "source_ref": "2026-06-22.md#notes",
+      "tags": [
+        "phrase",
+        "日"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "journal-2026-06-22",
+      "title": "Japanese Journal - 2026-06-22",
+      "source_path": "2026-06-22.md",
+      "source_date": "2026-06-22",
+      "sections": [
+        {
+          "id": "key-readings",
+          "heading": "Key Readings",
+          "markdown": "日 changes reading by word, date, and phrase: ひ, にち, び, か, 日本, 本日, 毎日."
+        },
+        {
+          "id": "date-readings",
+          "heading": "Date Readings",
+          "markdown": "Special date readings from 1日 through 10日, plus 11日 and 20日."
+        },
+        {
+          "id": "time-words",
+          "heading": "Time Words",
+          "markdown": "一昨日, 昨日, 今日, 明日, 明後日, and 翌日."
+        },
+        {
+          "id": "special-readings",
+          "heading": "Special Readings And Phrases",
+          "markdown": "日暮里 is にっぽり, 春日町 is かすがちょう, and 日が暮れる means the sun sets."
+        }
+      ]
+    }
+  ],
+  "levels": [
+    {
+      "id": "journal-2026-06-22-key-readings",
+      "title": "Many Faces Of 日",
+      "description": "Core 日 readings and everyday words from the first journal lesson.",
+      "document_id": "journal-2026-06-22",
+      "section_id": "key-readings",
+      "card_ids": [
+        "journal-2026-06-22-hi",
+        "journal-2026-06-22-nichi",
+        "journal-2026-06-22-bi",
+        "journal-2026-06-22-ka",
+        "journal-2026-06-22-nihon",
+        "journal-2026-06-22-nippon",
+        "journal-2026-06-22-honjitsu",
+        "journal-2026-06-22-mainichi"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-date-readings",
+      "title": "Calendar Breakers",
+      "description": "Special date readings that do not follow the plain にち pattern.",
+      "document_id": "journal-2026-06-22",
+      "section_id": "date-readings",
+      "required_card_ids": [
+        "journal-2026-06-22-ka",
+        "journal-2026-06-22-nichi"
+      ],
+      "card_ids": [
+        "journal-2026-06-22-tsuitachi",
+        "journal-2026-06-22-futsuka",
+        "journal-2026-06-22-mikka",
+        "journal-2026-06-22-yokka",
+        "journal-2026-06-22-itsuka",
+        "journal-2026-06-22-muika",
+        "journal-2026-06-22-nanoka",
+        "journal-2026-06-22-youka",
+        "journal-2026-06-22-kokonoka",
+        "journal-2026-06-22-tooka",
+        "journal-2026-06-22-juuichi-nichi",
+        "journal-2026-06-22-hatsuka"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-time-words",
+      "title": "Today And Around It",
+      "description": "Common words for yesterday, today, tomorrow, and adjacent days.",
+      "document_id": "journal-2026-06-22",
+      "section_id": "time-words",
+      "required_card_ids": [
+        "journal-2026-06-22-honjitsu",
+        "journal-2026-06-22-mainichi"
+      ],
+      "card_ids": [
+        "journal-2026-06-22-ototoi",
+        "journal-2026-06-22-kinou",
+        "journal-2026-06-22-kyou",
+        "journal-2026-06-22-ashita",
+        "journal-2026-06-22-asatte",
+        "journal-2026-06-22-yokujitsu"
+      ]
+    },
+    {
+      "id": "journal-2026-06-22-special-readings",
+      "title": "Place Names And Phrases",
+      "description": "Special readings and phrase chunks from the journal sentences.",
+      "document_id": "journal-2026-06-22",
+      "section_id": "special-readings",
+      "required_card_ids": [
+        "journal-2026-06-22-hi",
+        "journal-2026-06-22-mainichi"
+      ],
+      "card_ids": [
+        "journal-2026-06-22-nichiyoubi",
+        "journal-2026-06-22-nippori",
+        "journal-2026-06-22-kasugachou",
+        "journal-2026-06-22-hi-ga-kureru"
+      ]
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "journal-2026-06-22",
+      "title": "日 Reading Line",
+      "description": "First playable content route seeded from the 2026-06-22 Japanese journal lesson.",
+      "document_ids": [
+        "journal-2026-06-22"
+      ],
+      "level_ids": [
+        "journal-2026-06-22-key-readings",
+        "journal-2026-06-22-date-readings",
+        "journal-2026-06-22-time-words",
+        "journal-2026-06-22-special-readings"
+      ],
+      "start_level_id": "journal-2026-06-22-key-readings"
+    }
+  ]
+}

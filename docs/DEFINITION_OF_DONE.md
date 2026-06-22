@@ -11,6 +11,7 @@ and the next ticket can safely start.
 - Nonblocking agentic tasks are either complete or explicitly deferred.
 - Acceptance criteria from the ticket are verified.
 - Relevant tests or smoke checks were run and recorded.
+- The relevant gates from [Testing Gates](./TESTING_GATES.md) passed or have a documented blocker.
 - Any known limitation is written in the ticket before close.
 - The repo is left runnable or inspectable.
 
