@@ -72,7 +72,7 @@ func New(opts Options) Model {
 	model := Model{
 		username: username,
 		mode:     modeDrill,
-		drill:    game.NewDrill(library, game.Config{}).Start(),
+		drill:    game.NewDrill(library, game.Config{SpawnEvery: 6, MaxEnemies: 3}).Start(),
 		boss:     boss.NewFight(newDocumentBoss(library)),
 		loadErr:  loadErr,
 	}
@@ -188,8 +188,10 @@ func (m Model) submitInput() Model {
 	case game.AnswerMiss:
 		if result.Enemy.CardID != "" {
 			m.appendEvent(statestore.EnemyMissed(result.Enemy.CardID))
+			m.last = fmt.Sprintf("MISS %s  target %s wants %s", result.Input, result.Enemy.Text, result.Enemy.Kana)
+		} else {
+			m.last = fmt.Sprintf("MISS %s", result.Input)
 		}
-		m.last = fmt.Sprintf("MISS %s", result.Input)
 	default:
 		m.last = "READY"
 	}
@@ -205,7 +207,7 @@ func (m Model) showHint() Model {
 		return m
 	}
 	m.appendEvent(statestore.HintRevealed(hint.Enemy.CardID, "romaji"))
-	m.hint = fmt.Sprintf("hint: %s = %s", hint.Enemy.Text, hint.Romaji)
+	m.hint = fmt.Sprintf("hint: %s = %s (%s)", hint.Enemy.Text, hint.Enemy.Kana, hint.Romaji)
 	return m
 }
 
@@ -281,8 +283,16 @@ func (m Model) drillCard(width int) string {
 	if len(enemies) == 0 {
 		body = append(body, "no targets")
 	} else {
-		for _, enemy := range enemies {
-			body = append(body, fmt.Sprintf("row %02d  %s  %s", enemy.Row, enemy.Text, enemy.Meaning))
+		target := enemies[0]
+		body = append(body,
+			fmt.Sprintf("target  %s", target.Text),
+			fmt.Sprintf("note    %s", target.Meaning),
+		)
+		if len(enemies) > 1 {
+			body = append(body, "queue")
+			for _, enemy := range enemies[1:] {
+				body = append(body, fmt.Sprintf("  %s  %s", enemy.Text, enemy.Meaning))
+			}
 		}
 	}
 

@@ -76,7 +76,7 @@ func TestKanaInputHitAndHintActions(t *testing.T) {
 	if model.drill.Hints() != 1 || model.drill.Hits() != 0 || model.drill.Misses() != 0 {
 		t.Fatalf("hint counts = hits %d misses %d hints %d, want 0/0/1", model.drill.Hits(), model.drill.Misses(), model.drill.Hints())
 	}
-	if !strings.Contains(atoms.StripANSI(model.View()), "hint: 日 = hi") {
+	if !strings.Contains(atoms.StripANSI(model.View()), "hint: 日 = ひ (hi)") {
 		t.Fatalf("hint not shown in view:\n%s", model.View())
 	}
 
@@ -90,6 +90,24 @@ func TestKanaInputHitAndHintActions(t *testing.T) {
 	}
 	if !strings.Contains(atoms.StripANSI(model.View()), "HIT 日 -> ひ") {
 		t.Fatalf("hit not shown in view:\n%s", model.View())
+	}
+}
+
+func TestDrillViewShowsTargetAndQueueWithoutRows(t *testing.T) {
+	model := New(Options{Library: testLibrary(), DisableEventLog: true})
+	model.drill = model.drill.Tick()
+	model.drill = model.drill.Tick()
+	model.drill = model.drill.Tick()
+	model.drill, _ = model.drill.Spawn()
+
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{"target  日", "note    sun; day", "queue", "日本  Japan"} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("drill view missing %q:\n%s", want, view)
+		}
+	}
+	if strings.Contains(view, "row ") {
+		t.Fatalf("drill view should not expose internal row counters:\n%s", view)
 	}
 }
 
