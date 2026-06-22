@@ -147,6 +147,114 @@ func TestSwitchesToConstitutionLevelFromLoadedContent(t *testing.T) {
 	}
 }
 
+func TestStationSelectorShowsOpenAndLockedLevels(t *testing.T) {
+	model := New(Options{DisableEventLog: true})
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}})
+	if cmd != nil {
+		t.Fatalf("Update(s) returned command, want nil")
+	}
+	model = updated.(Model)
+
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{
+		"STATIONS",
+		"Tide Gate",
+		"Constitution Gate",
+		"Emperor Symbol",
+		"LOCKED",
+		"needs:",
+		"日本国民は/にほんこくみんは",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("station selector missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestStationSelectorSwitchesSelectedOpenLevel(t *testing.T) {
+	model := New(Options{DisableEventLog: true}).openStations()
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("jjjj")})
+	if cmd != nil {
+		t.Fatalf("Update(jjjj) returned command, want nil")
+	}
+	model = updated.(Model)
+
+	updated, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		t.Fatalf("Update(enter) returned command, want nil")
+	}
+	model = updated.(Model)
+
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{
+		"Station: Constitution Gate: Preamble 1",
+		"target  日本国民は",
+		"LEVEL Constitution Gate: Preamble 1",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("selected level view missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestStationSelectorKeepsLockedLevelVisible(t *testing.T) {
+	model := New(Options{DisableEventLog: true}).openStations()
+	model.cursor = indexLevelOption(model.levelOptions(), "constitution-article-1")
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		t.Fatalf("Update(enter) returned command, want nil")
+	}
+	model = updated.(Model)
+
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{
+		"STATIONS",
+		"LOCKED Article 1: Symbol Of The State",
+		"needs:",
+		"日本国民は/にほんこくみんは",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("locked level view missing %q:\n%s", want, view)
+		}
+	}
+	if strings.Contains(view, "Station: Article 1: Symbol Of The State") {
+		t.Fatalf("locked level should not switch drill station:\n%s", view)
+	}
+}
+
+func TestStationSelectorSwitchesUnlockedLevel(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	log := statestore.NewEventLog(path)
+	for _, cardID := range []string{
+		"constitution-preamble-nihon-kokumin-wa",
+		"constitution-preamble-shuken",
+		"constitution-preamble-kenpou",
+	} {
+		if err := log.Append(statestore.CardMastered(cardID)); err != nil {
+			t.Fatalf("append mastery event: %v", err)
+		}
+	}
+
+	model := New(Options{EventLogPath: path}).openStations()
+	model.cursor = indexLevelOption(model.levelOptions(), "constitution-article-1")
+	updated, _ := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	model = updated.(Model)
+
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{
+		"Station: Article 1: Symbol Of The State",
+		"target  第一条",
+		"LEVEL Article 1: Symbol Of The State",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("unlocked level view missing %q:\n%s", want, view)
+		}
+	}
+}
+
 func TestKanaActionsAppendStateEvents(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "events.jsonl")
 	model := New(Options{Library: testLibrary(), EventLogPath: path})
