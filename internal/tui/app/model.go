@@ -71,6 +71,7 @@ type Model struct {
 	last     string
 	hint     string
 	bossHint string
+	hinted   map[string]bool
 	scene    string
 	loadErr  string
 	logErr   string
@@ -175,6 +176,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.input = ""
 			m.hint = ""
 			m.bossHint = ""
+			m.hinted = nil
 		case "enter":
 			if m.mode == modeStations {
 				m = m.selectStation()
@@ -271,8 +273,15 @@ func (m Model) submitInput() Model {
 
 	switch result.Status {
 	case game.AnswerHit:
-		m.appendEvent(statestore.EnemyHit(result.Enemy.CardID))
+		clean := !m.hinted[result.Enemy.CardID]
+		unlocked := m.appendHitAndUnlocks(result.Enemy.CardID, clean)
+		delete(m.hinted, result.Enemy.CardID)
 		m.last = fmt.Sprintf("HIT %s -> %s", result.Enemy.Text, result.Enemy.Kana)
+		if len(unlocked) > 0 {
+			title := unlocked[len(unlocked)-1]
+			m.scene = renderScene(coretransition.SceneStationArrival, title, m.cardWidth())
+			m.last = fmt.Sprintf("%s  UNLOCK %s", m.last, title)
+		}
 		if len(m.drill.Enemies()) == 0 {
 			m.drill, _ = m.drill.Spawn()
 		}
@@ -298,6 +307,10 @@ func (m Model) showHint() Model {
 		return m
 	}
 	m.appendEvent(statestore.HintRevealed(hint.Enemy.CardID, "romaji"))
+	if m.hinted == nil {
+		m.hinted = map[string]bool{}
+	}
+	m.hinted[hint.Enemy.CardID] = true
 	m.hint = fmt.Sprintf("hint: %s = %s (%s)", hint.Enemy.Text, hint.Enemy.Kana, hint.Romaji)
 	return m
 }
@@ -307,6 +320,7 @@ func (m Model) openStations() Model {
 	m.input = ""
 	m.hint = ""
 	m.bossHint = ""
+	m.hinted = nil
 	options := m.levelOptions()
 	m.cursor = indexLevelOption(options, m.levelID)
 	m.last = "STATION SELECT"
@@ -367,6 +381,7 @@ func (m Model) switchLevel(levelID string) Model {
 	m.input = ""
 	m.hint = ""
 	m.bossHint = ""
+	m.hinted = nil
 	m.scene = renderScene(coretransition.SceneStationArrival, m.level, m.cardWidth())
 	m.last = fmt.Sprintf("LEVEL %s", m.level)
 	return m
@@ -377,6 +392,7 @@ func (m Model) enterBoss() Model {
 	m.input = ""
 	m.hint = ""
 	m.bossHint = ""
+	m.hinted = nil
 	b := m.boss.Boss()
 	m.appendEvent(statestore.BossIntro(b.ID))
 	m.scene = renderScene(coretransition.SceneBossIntro, b.Title, m.cardWidth())
@@ -432,6 +448,33 @@ func (m *Model) appendEvent(event statestore.Event) {
 	if err := m.eventLog.Append(event); err != nil {
 		m.logErr = err.Error()
 	}
+}
+
+func (m *Model) appendHitAndUnlocks(cardID string, clean bool) []string {
+	if m.eventLog.Path() == "" {
+		return nil
+	}
+	before := m.progress()
+	beforeAvailable := m.availableLevelIDs(before)
+
+	m.appendEvent(statestore.EnemyHitWithClean(cardID, clean))
+
+	after := m.progress()
+	if m.library == nil {
+		return nil
+	}
+	unlocked := make([]string, 0)
+	for _, level := range m.library.Levels {
+		if len(level.RequiredCardIDs) == 0 {
+			continue
+		}
+		if beforeAvailable[level.ID] || after.UnlockedLevels[level.ID] || !levelAvailable(level, after) {
+			continue
+		}
+		m.appendEvent(statestore.LevelUnlocked(level.ID))
+		unlocked = append(unlocked, firstNonBlank(level.Title, level.ID))
+	}
+	return unlocked
 }
 
 func (m Model) drillCard(width int) string {
@@ -549,20 +592,46 @@ func (m Model) levelOptions() []levelOption {
 			Description: level.Description,
 			CardCount:   len(level.CardIDs),
 		}
+		explicitlyUnlocked := progress.UnlockedLevels[level.ID]
 		for _, cardID := range level.RequiredCardIDs {
 			card, ok := cardIndex[cardID]
 			if !ok {
 				continue
 			}
 			option.Required = append(option.Required, card)
-			if !progress.Cards[cardID].Mastered {
+			if !explicitlyUnlocked && !progress.Cards[cardID].Mastered {
 				option.Missing = append(option.Missing, card)
 			}
 		}
-		option.Locked = len(option.Missing) > 0
+		option.Locked = !levelAvailable(level, progress)
 		options = append(options, option)
 	}
 	return options
+}
+
+func (m Model) availableLevelIDs(progress statestore.Progress) map[string]bool {
+	available := map[string]bool{}
+	if m.library == nil {
+		return available
+	}
+	for _, level := range m.library.Levels {
+		if levelAvailable(level, progress) {
+			available[level.ID] = true
+		}
+	}
+	return available
+}
+
+func levelAvailable(level content.Level, progress statestore.Progress) bool {
+	if progress.UnlockedLevels[level.ID] {
+		return true
+	}
+	for _, cardID := range level.RequiredCardIDs {
+		if !progress.Cards[cardID].Mastered {
+			return false
+		}
+	}
+	return true
 }
 
 func (m Model) stationNameForLevel(levelID string) string {

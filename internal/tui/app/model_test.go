@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/superposition/kotoba-line/internal/content"
+	"github.com/superposition/kotoba-line/internal/game"
 	statestore "github.com/superposition/kotoba-line/internal/state"
 	"github.com/superposition/kotoba-line/internal/tui/atoms"
 )
@@ -279,6 +280,87 @@ func TestKanaActionsAppendStateEvents(t *testing.T) {
 	if events[1].Type != statestore.EventEnemyHit || events[1].CardID != "hi" {
 		t.Fatalf("second event = %#v, want hit for hi", events[1])
 	}
+	if events[1].Clean == nil || *events[1].Clean {
+		t.Fatalf("hinted drill hit should be unclean: %#v", events[1])
+	}
+}
+
+func TestCleanPrerequisiteHitsUnlockGatedArticleLevel(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	model := New(Options{EventLogPath: path}).switchLevel(constitutionLevelID)
+
+	for _, cardID := range articleOnePrerequisiteCardIDs() {
+		model = masterCardClean(t, model, cardID)
+	}
+
+	events, err := statestore.NewEventLog(path).ReadAll()
+	if err != nil {
+		t.Fatalf("read event log: %v", err)
+	}
+	unlockCount := 0
+	for _, event := range events {
+		if event.Type == statestore.EventLevelUnlocked && event.LevelID == "constitution-article-1" {
+			unlockCount++
+		}
+	}
+	if unlockCount != 1 {
+		t.Fatalf("level unlock count = %d, want 1: %#v", unlockCount, events)
+	}
+
+	progress, err := statestore.NewEventLog(path).Replay()
+	if err != nil {
+		t.Fatalf("replay event log: %v", err)
+	}
+	if !progress.UnlockedLevels["constitution-article-1"] {
+		t.Fatalf("article level was not durably unlocked: %#v", progress.UnlockedLevels)
+	}
+
+	model = New(Options{EventLogPath: path}).openStations()
+	option, ok := model.levelOption("constitution-article-1")
+	if !ok {
+		t.Fatalf("article level option missing")
+	}
+	if option.Locked {
+		t.Fatalf("article level should be open after prerequisite mastery: %#v", option.Missing)
+	}
+	if !strings.Contains(atoms.StripANSI(model.View()), "OPEN   Emperor Symbol") {
+		t.Fatalf("station selector should show Emperor Symbol open:\n%s", model.View())
+	}
+}
+
+func TestHintedPrerequisiteHitsDoNotUnlockGatedArticleLevel(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	model := New(Options{EventLogPath: path}).switchLevel(constitutionLevelID)
+
+	for _, cardID := range articleOnePrerequisiteCardIDs() {
+		model = hitCardWithHint(t, model, cardID)
+		model = hitCardWithHint(t, model, cardID)
+		model = hitCardWithHint(t, model, cardID)
+	}
+
+	progress, err := statestore.NewEventLog(path).Replay()
+	if err != nil {
+		t.Fatalf("replay event log: %v", err)
+	}
+	if progress.UnlockedLevels["constitution-article-1"] {
+		t.Fatalf("article level should not unlock from hinted hits: %#v", progress.UnlockedLevels)
+	}
+	for _, cardID := range articleOnePrerequisiteCardIDs() {
+		card := progress.Cards[cardID]
+		if card.Mastered {
+			t.Fatalf("card %s should not be mastered from hinted hits: %#v", cardID, card)
+		}
+	}
+
+	events, err := statestore.NewEventLog(path).ReadAll()
+	if err != nil {
+		t.Fatalf("read event log: %v", err)
+	}
+	for _, event := range events {
+		if event.Type == statestore.EventLevelUnlocked && event.LevelID == "constitution-article-1" {
+			t.Fatalf("unexpected article unlock event: %#v", events)
+		}
+	}
 }
 
 func TestBossModeDamagesBossAndRendersTransition(t *testing.T) {
@@ -350,6 +432,65 @@ func TestBossModeAppendsReplayableStateEvents(t *testing.T) {
 	if !strings.Contains(atoms.StripANSI(model.View()), "LEVEL CLEAR") {
 		t.Fatalf("clear view missing LEVEL CLEAR:\n%s", model.View())
 	}
+}
+
+func articleOnePrerequisiteCardIDs() []string {
+	return []string{
+		"constitution-preamble-nihon-kokumin-wa",
+		"constitution-preamble-shuken",
+		"constitution-preamble-kenpou",
+	}
+}
+
+func masterCardClean(t *testing.T, model Model, cardID string) Model {
+	t.Helper()
+	card := mustLibraryCard(t, model.library, cardID)
+	model.drill = game.NewDrillFromCards([]content.Card{card}, game.Config{SpawnEvery: 6, MaxEnemies: 1}).Start()
+	for i := 0; i < statestore.MasteryCleanHitStreak; i++ {
+		model = submitKana(t, model, card.Reading.Kana)
+	}
+	return model
+}
+
+func hitCardWithHint(t *testing.T, model Model, cardID string) Model {
+	t.Helper()
+	card := mustLibraryCard(t, model.library, cardID)
+	model.drill = game.NewDrillFromCards([]content.Card{card}, game.Config{SpawnEvery: 6, MaxEnemies: 1}).Start()
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}})
+	if cmd != nil {
+		t.Fatalf("Update(?) returned command, want nil")
+	}
+	model = updated.(Model)
+	return submitKana(t, model, card.Reading.Kana)
+}
+
+func submitKana(t *testing.T, model Model, kana string) Model {
+	t.Helper()
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(kana)})
+	if cmd != nil {
+		t.Fatalf("Update(kana) returned command, want nil")
+	}
+	model = updated.(Model)
+	updated, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		t.Fatalf("Update(enter) returned command, want nil")
+	}
+	return updated.(Model)
+}
+
+func mustLibraryCard(t *testing.T, library *content.Library, cardID string) content.Card {
+	t.Helper()
+	if library == nil {
+		t.Fatalf("library is nil")
+	}
+	for _, card := range library.Cards {
+		if card.ID == cardID {
+			return card
+		}
+	}
+	t.Fatalf("card %q missing", cardID)
+	return content.Card{}
 }
 
 func testLibrary() *content.Library {

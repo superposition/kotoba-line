@@ -12,22 +12,17 @@ Move from the starter `日` deck toward document-reading gameplay:
 
 ## Current Slice
 
-Issue #15 is the blocking implementation slice for this wave.
+Issue #17 is the blocking implementation slice for this wave.
 
 Blocking scope:
 
-- Convert the existing Constitution prep fixture into `content.Library`
-  gameplay data.
-- Keep official source text separate from learner cards and hints.
-- Add reachable Constitution station levels to the SSH app.
-- Keep the starter `日` deck available.
-- Support full-width `？` as a hint key so Japanese IME users do not need to
-  switch keyboards.
+- Gate document sections from replayed mastery state.
+- Keep locked document targets out of normal drill play.
+- Emit `level_unlocked` when prerequisite mastery opens a new station.
+- Track hinted drill hits as unclean so hints cannot build mastery streaks.
 
 Deferred:
 
-- Full level selector UI is tracked by #16.
-- Mastery-gated document sections are tracked by #17.
 - Hosted Railway SSH remains tracked by #10.
 
 ## Validation Plan
@@ -36,10 +31,10 @@ Deferred:
 - `go test ./...`
 - `git diff --check`
 - local SSH smoke:
-  - press `c` to enter Constitution Gate;
-  - press `？` to reveal the kana hint;
-  - answer `にほんこくみんは`;
-  - press `j` to return to the starter deck.
+  - open `s` and verify Article 1 starts locked;
+  - master the three Article 1 prerequisite cards with clean hits;
+  - verify Article 1 unlocks and appears open in the station selector;
+  - verify `？` hints do not count as clean mastery hits.
 
 ## Issue #16 Closeout Notes
 
@@ -65,3 +60,30 @@ Validation:
   - reopened `s`;
   - selected locked Emperor Symbol / Article 1;
   - verified missing prerequisites render as separate readable lines.
+
+## Issue #17 Closeout Notes
+
+The skill-tree gate is the third Wave 004 slice.
+
+Completed:
+
+- Article 1 availability is computed from replayed progress over its required
+  preamble cards.
+- The station selector still shows locked levels, but locked levels cannot be
+  entered or spawned as drill targets.
+- Three clean hits on each Article 1 prerequisite emit one durable
+  `level_unlocked` event for `constitution-article-1`.
+- Drill hits after `?` or `？` are written as unclean hits and do not advance
+  mastery streaks.
+
+Validation:
+
+- `go test ./internal/tui/app ./internal/state ./internal/transition`
+- `go test ./...`
+- `git diff --check`
+- local SSH smoke:
+  - opened `s`;
+  - verified Emperor Symbol / Article 1 starts locked;
+  - replayed clean prerequisite mastery in tests and verified the station opens;
+  - replayed hinted prerequisite hits in tests and verified the station remains
+    locked.
