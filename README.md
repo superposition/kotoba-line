@@ -26,6 +26,13 @@ campaign target is a small slice of the Japanese Constitution.
 
 - [2026-06-22.md](./2026-06-22.md): first journal lesson focused on readings of `日`.
 
+## Deployment
+
+Railway deployment prep lives in [docs/deploy/railway.md](./docs/deploy/railway.md).
+The hosted SSH service should bind `0.0.0.0:${PORT:-2222}`, persist state at
+`/data`, run as a single replica while using a Railway Volume, and expose only
+the game TUI over SSH.
+
 ## Ticket Roadmap
 
 See [ROADMAP.md](./ROADMAP.md).
@@ -34,3 +41,4 @@ See [ROADMAP.md](./ROADMAP.md).
 
 - [Definition of Done](./docs/DEFINITION_OF_DONE.md)
 - [Agentic Phases](./docs/AGENTIC_PHASES.md)
+- [Testing Gates](./docs/TESTING_GATES.md)

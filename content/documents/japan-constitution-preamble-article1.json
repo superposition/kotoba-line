@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "document_id": "jp-constitution",
+  "title": {
+    "ja": "日本国憲法",
+    "en": "The Constitution of Japan"
+  },
+  "law_id": "321CONSTITUTION",
+  "source_notes": [
+    {
+      "source": "e-Gov Law Search",
+      "url": "https://laws.e-gov.go.jp/law/321CONSTITUTION",
+      "api_url": "https://laws.e-gov.go.jp/api/1/lawdata/321CONSTITUTION",
+      "retrieved_on": "2026-06-22",
+      "note": "Primary source for the official Japanese text in this fixture."
+    },
+    {
+      "source": "Japanese Law Translation",
+      "url": "https://www.japaneselawtranslation.go.jp/en/laws/view/174/ja",
+      "retrieved_on": "2026-06-22",
+      "note": "Secondary rendering check for the same Japanese text."
+    }
+  ],
+  "preservation": {
+    "official_text_locked": true,
+    "normalization": "none",
+    "note": "Preserve official orthography and punctuation exactly as imported. Learner readings, romaji, glosses, chunking, and review status are layered in campaign fixtures instead of editing this text."
+  },
+  "sections": [
+    {
+      "section_id": "preamble-1",
+      "kind": "preamble_paragraph",
+      "label": {
+        "ja": "前文 第一段",
+        "en": "Preamble, paragraph 1"
+      },
+      "official_text": "日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。",
+      "source_refs": [
+        "e-gov:321CONSTITUTION:preamble:paragraph:1",
+        "jlt:174:ja:preamble:paragraph:1"
+      ]
+    },
+    {
+      "section_id": "article-1",
+      "kind": "article",
+      "chapter": {
+        "number": 1,
+        "title_ja": "天皇",
+        "title_en": "THE EMPEROR"
+      },
+      "article": {
+        "number": 1,
+        "title_ja": "第一条"
+      },
+      "label": {
+        "ja": "第一章 天皇 第一条",
+        "en": "Chapter I, Article 1"
+      },
+      "official_text": "第一条 天皇は、日本国の象徴であり日本国民統合の象徴であつて、この地位は、主権の存する日本国民の総意に基く。",
+      "official_body": "天皇は、日本国の象徴であり日本国民統合の象徴であつて、この地位は、主権の存する日本国民の総意に基く。",
+      "source_refs": [
+        "e-gov:321CONSTITUTION:article:1",
+        "jlt:174:ja:article:1"
+      ]
+    }
+  ]
+}
