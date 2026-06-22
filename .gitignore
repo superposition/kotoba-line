@@ -1,0 +1,18 @@
+# Go
+/bin/
+/dist/
+*.test
+*.out
+
+# Local game state
+/state/
+/data/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Railway/local env
+.env
+.env.*
