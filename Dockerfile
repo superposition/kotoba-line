@@ -6,10 +6,10 @@ FROM golang:${GO_VERSION}-alpine AS build
 WORKDIR /src
 
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod go mod download
+RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod go mod download
 
 COPY . .
-RUN --mount=type=cache,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/kotoba-ssh ./cmd/kotoba-ssh
 
 FROM alpine:3.22
@@ -40,7 +40,6 @@ EOF
 COPY --from=build /out/kotoba-ssh /app/kotoba-ssh
 COPY content /app/content
 
-VOLUME ["/data"]
 EXPOSE 2222/tcp
 
 CMD ["/usr/local/bin/kotoba-railway-start"]

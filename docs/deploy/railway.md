@@ -27,6 +27,10 @@ persisted state path on Railway.
 ## Repository Configuration
 
 - `Dockerfile` builds `./cmd/kotoba-ssh` into `/app/kotoba-ssh`.
+- Dockerfile cache mounts must include explicit `id=` values for Railway's
+  builder.
+- Do not add a Docker `VOLUME` instruction for `/data`; Railway rejects Docker
+  volumes and expects the service Volume resource plus `requiredMountPath`.
 - `railway.toml` selects Railway's Dockerfile builder, starts
   `/usr/local/bin/kotoba-railway-start`, requires a `/data` mount, and pins the
   service to one replica.
@@ -125,3 +129,9 @@ Record the exact proxy host, proxy port, deploy URL, and persistence check.
   <https://docs.railway.com/networking/tcp-proxy>
 - Railway Volumes:
   <https://docs.railway.com/volumes/reference>
+
+## Attempt Logs
+
+- [Wave 002 Worker C](./railway-wave-002-worker-c.md)
+- [Wave 003 Worker D](./railway-wave-003-worker-d.md)
+- [Wave 004 Worker E](./railway-wave-004-worker-e.md)
