@@ -37,6 +37,21 @@ func TestLoadStationCatalog(t *testing.T) {
 	if hook.Path != filepath.ToSlash(filepath.Join("assets", "midi", "tide-gate.local.mid")) {
 		t.Fatalf("midi hook path = %q", hook.Path)
 	}
+
+	constitutionGate, ok := catalog.Find("constitution-gate")
+	if !ok {
+		t.Fatalf("missing constitution-gate station")
+	}
+	if constitutionGate.LevelID != "constitution-preamble-1" {
+		t.Fatalf("constitution gate level id = %q", constitutionGate.LevelID)
+	}
+	emperorSymbol, ok := catalog.Find("emperor-symbol")
+	if !ok {
+		t.Fatalf("missing emperor-symbol station")
+	}
+	if emperorSymbol.LevelID != "constitution-article-1" {
+		t.Fatalf("emperor symbol level id = %q", emperorSymbol.LevelID)
+	}
 }
 
 func TestRegisterLocalMIDIAddsOptionalHook(t *testing.T) {

@@ -1,0 +1,374 @@
+{
+  "cards": [
+    {
+      "id": "constitution-preamble-nihon-kokumin-wa",
+      "text": "日本国民は",
+      "kanji": "日本国民は",
+      "reading": {
+        "kana": "にほんこくみんは",
+        "romaji_hint": "nihon-kokumin wa"
+      },
+      "meaning": "the Japanese people",
+      "type": "phrase",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "notes": [
+        "Topic particle は is pronounced わ in context."
+      ],
+      "tags": [
+        "constitution",
+        "preamble",
+        "particle"
+      ]
+    },
+    {
+      "id": "constitution-preamble-seitou-ni-senkyo-sareta",
+      "text": "正当に選挙された",
+      "kanji": "正当に選挙された",
+      "reading": {
+        "kana": "せいとうにせんきょされた",
+        "romaji_hint": "seitou ni senkyo sareta"
+      },
+      "meaning": "duly elected",
+      "type": "phrase",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "tags": [
+        "constitution",
+        "preamble",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-preamble-kokkai",
+      "text": "国会",
+      "kanji": "国会",
+      "reading": {
+        "kana": "こっかい",
+        "romaji_hint": "kokkai"
+      },
+      "meaning": "National Diet",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "tags": [
+        "constitution",
+        "preamble",
+        "government"
+      ]
+    },
+    {
+      "id": "constitution-preamble-shuken",
+      "text": "主権",
+      "kanji": "主権",
+      "reading": {
+        "kana": "しゅけん",
+        "romaji_hint": "shuken"
+      },
+      "meaning": "sovereignty; sovereign power",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "tags": [
+        "constitution",
+        "preamble",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-preamble-kenpou",
+      "text": "憲法",
+      "kanji": "憲法",
+      "reading": {
+        "kana": "けんぽう",
+        "romaji_hint": "kenpou"
+      },
+      "meaning": "constitution",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "tags": [
+        "constitution",
+        "preamble",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-preamble-motozuku",
+      "text": "基く",
+      "kanji": "基く",
+      "reading": {
+        "kana": "もとづく",
+        "romaji_hint": "motozuku"
+      },
+      "meaning": "to be based on",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "notes": [
+        "Official source preserves historical spelling."
+      ],
+      "tags": [
+        "constitution",
+        "preamble",
+        "historical-kana"
+      ]
+    },
+    {
+      "id": "constitution-preamble-shouchoku",
+      "text": "詔勅",
+      "kanji": "詔勅",
+      "reading": {
+        "kana": "しょうちょく",
+        "romaji_hint": "shouchoku"
+      },
+      "meaning": "imperial rescripts",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#preamble-1",
+      "tags": [
+        "constitution",
+        "preamble",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-article-1-dai-ichi-jou",
+      "text": "第一条",
+      "kanji": "第一条",
+      "reading": {
+        "kana": "だいいちじょう",
+        "romaji_hint": "dai-ichi-jou"
+      },
+      "meaning": "Article 1",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "tags": [
+        "constitution",
+        "article-1",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-article-1-tennou",
+      "text": "天皇",
+      "kanji": "天皇",
+      "reading": {
+        "kana": "てんのう",
+        "romaji_hint": "tennou"
+      },
+      "meaning": "the Emperor",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "tags": [
+        "constitution",
+        "article-1"
+      ]
+    },
+    {
+      "id": "constitution-article-1-shouchou",
+      "text": "象徴",
+      "kanji": "象徴",
+      "reading": {
+        "kana": "しょうちょう",
+        "romaji_hint": "shouchou"
+      },
+      "meaning": "symbol",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "tags": [
+        "constitution",
+        "article-1"
+      ]
+    },
+    {
+      "id": "constitution-article-1-nihon-kokumin-tougou",
+      "text": "日本国民統合",
+      "kanji": "日本国民統合",
+      "reading": {
+        "kana": "にほんこくみんとうごう",
+        "romaji_hint": "nihon-kokumin tougou"
+      },
+      "meaning": "unity of the Japanese people",
+      "type": "phrase",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "tags": [
+        "constitution",
+        "article-1",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-article-1-atte",
+      "text": "あつて",
+      "kanji": "あつて",
+      "reading": {
+        "kana": "あって",
+        "romaji_hint": "atte"
+      },
+      "meaning": "and being",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "notes": [
+        "Official source preserves historical spelling."
+      ],
+      "tags": [
+        "constitution",
+        "article-1",
+        "historical-kana"
+      ]
+    },
+    {
+      "id": "constitution-article-1-son-suru",
+      "text": "存する",
+      "kanji": "存する",
+      "reading": {
+        "kana": "そんする",
+        "romaji_hint": "son suru"
+      },
+      "meaning": "to reside; to exist",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "tags": [
+        "constitution",
+        "article-1",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-article-1-soui",
+      "text": "総意",
+      "kanji": "総意",
+      "reading": {
+        "kana": "そうい",
+        "romaji_hint": "soui"
+      },
+      "meaning": "general will; consensus",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "tags": [
+        "constitution",
+        "article-1",
+        "legal"
+      ]
+    },
+    {
+      "id": "constitution-article-1-motozuku",
+      "text": "基く",
+      "kanji": "基く",
+      "reading": {
+        "kana": "もとづく",
+        "romaji_hint": "motozuku"
+      },
+      "meaning": "to be based on",
+      "type": "word",
+      "playable": true,
+      "needs_review": true,
+      "source_ref": "jp-constitution#article-1",
+      "notes": [
+        "Official source preserves historical spelling."
+      ],
+      "tags": [
+        "constitution",
+        "article-1",
+        "historical-kana"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "jp-constitution",
+      "title": "日本国憲法",
+      "source_path": "content/documents/japan-constitution-preamble-article1.json",
+      "source_date": "1946-11-03",
+      "sections": [
+        {
+          "id": "preamble-1",
+          "heading": "前文 第一段",
+          "markdown": "日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。"
+        },
+        {
+          "id": "article-1",
+          "heading": "第一章 天皇 第一条",
+          "markdown": "第一条 天皇は、日本国の象徴であり日本国民統合の象徴であつて、この地位は、主権の存する日本国民の総意に基く。"
+        }
+      ]
+    }
+  ],
+  "levels": [
+    {
+      "id": "constitution-preamble-1",
+      "title": "Constitution Gate: Preamble 1",
+      "description": "First paragraph of the Japanese Constitution preamble as playable phrase and legal-vocabulary cards.",
+      "document_id": "jp-constitution",
+      "section_id": "preamble-1",
+      "card_ids": [
+        "constitution-preamble-nihon-kokumin-wa",
+        "constitution-preamble-seitou-ni-senkyo-sareta",
+        "constitution-preamble-kokkai",
+        "constitution-preamble-shuken",
+        "constitution-preamble-kenpou",
+        "constitution-preamble-motozuku",
+        "constitution-preamble-shouchoku"
+      ]
+    },
+    {
+      "id": "constitution-article-1",
+      "title": "Article 1: Symbol Of The State",
+      "description": "Chapter I, Article 1 vocabulary and phrases.",
+      "document_id": "jp-constitution",
+      "section_id": "article-1",
+      "required_card_ids": [
+        "constitution-preamble-nihon-kokumin-wa",
+        "constitution-preamble-shuken",
+        "constitution-preamble-kenpou"
+      ],
+      "card_ids": [
+        "constitution-article-1-dai-ichi-jou",
+        "constitution-article-1-tennou",
+        "constitution-article-1-shouchou",
+        "constitution-article-1-nihon-kokumin-tougou",
+        "constitution-article-1-atte",
+        "constitution-article-1-son-suru",
+        "constitution-article-1-soui",
+        "constitution-article-1-motozuku"
+      ]
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "constitution-preamble-article1",
+      "title": "日本国憲法: 前文と第一条",
+      "description": "Playable starter route for reading the Japanese Constitution preamble and Article 1.",
+      "document_ids": [
+        "jp-constitution"
+      ],
+      "level_ids": [
+        "constitution-preamble-1",
+        "constitution-article-1"
+      ],
+      "start_level_id": "constitution-preamble-1"
+    }
+  ]
+}

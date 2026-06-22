@@ -15,7 +15,7 @@ func TestViewShowsInitialScreen(t *testing.T) {
 	view := New(Options{Username: "player", Library: testLibrary(), DisableEventLog: true}).View()
 	plain := atoms.StripANSI(view)
 
-	for _, want := range []string{"Kotoba Line", "Player: player", "Station 01", "DRILL", "日"} {
+	for _, want := range []string{"Kotoba Line", "Player: player", "Station: Tide Gate", "DRILL", "日"} {
 		if !strings.Contains(plain, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
 		}
@@ -108,6 +108,42 @@ func TestDrillViewShowsTargetAndQueueWithoutRows(t *testing.T) {
 	}
 	if strings.Contains(view, "row ") {
 		t.Fatalf("drill view should not expose internal row counters:\n%s", view)
+	}
+}
+
+func TestFullWidthQuestionMarkRevealsHint(t *testing.T) {
+	model := New(Options{Library: testLibrary(), DisableEventLog: true})
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'？'}})
+	if cmd != nil {
+		t.Fatalf("Update(？) returned command, want nil")
+	}
+	model = updated.(Model)
+	if !strings.Contains(atoms.StripANSI(model.View()), "hint: 日 = ひ (hi)") {
+		t.Fatalf("full-width hint not shown in view:\n%s", model.View())
+	}
+}
+
+func TestSwitchesToConstitutionLevelFromLoadedContent(t *testing.T) {
+	model := New(Options{DisableEventLog: true})
+
+	updated, cmd := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'c'}})
+	if cmd != nil {
+		t.Fatalf("Update(c) returned command, want nil")
+	}
+	model = updated.(Model)
+
+	view := atoms.StripANSI(model.View())
+	for _, want := range []string{
+		"Station: Constitution Gate: Preamble 1",
+		"STATION ARRIVAL",
+		"target  日本国民は",
+		"note    the Japanese people",
+		"LEVEL Constitution Gate: Preamble 1",
+	} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("constitution view missing %q:\n%s", want, view)
+		}
 	}
 }
 
