@@ -37,6 +37,82 @@
         "seed",
         "opening"
       ]
+    },
+    {
+      "id": "constitution-gate",
+      "number": 2,
+      "name": "Constitution Gate",
+      "line": "Kotoba Line",
+      "level_id": "constitution-preamble-1",
+      "description": "Opening station for 日本国憲法 preamble reading.",
+      "visual_pulse": {
+        "enabled": true,
+        "bpm": 88,
+        "pattern": "gate",
+        "color": "yellow",
+        "accent_every": 4
+      },
+      "midi_hooks": [
+        {
+          "id": "constitution-gate-local",
+          "label": "Constitution Gate local MIDI",
+          "path": "assets/midi/constitution-gate.local.mid",
+          "source": "local-placeholder",
+          "optional": true,
+          "visual_pulse": {
+            "enabled": true,
+            "bpm": 88,
+            "pattern": "gate",
+            "color": "yellow",
+            "accent_every": 4
+          },
+          "notes": [
+            "Placeholder registration path only; add a rights-cleared local file before enabling MIDI playback."
+          ]
+        }
+      ],
+      "tags": [
+        "constitution",
+        "preamble"
+      ]
+    },
+    {
+      "id": "emperor-symbol",
+      "number": 3,
+      "name": "Emperor Symbol",
+      "line": "Kotoba Line",
+      "level_id": "constitution-article-1",
+      "description": "Station for 日本国憲法 第一条 vocabulary.",
+      "visual_pulse": {
+        "enabled": true,
+        "bpm": 92,
+        "pattern": "signal",
+        "color": "seafoam",
+        "accent_every": 4
+      },
+      "midi_hooks": [
+        {
+          "id": "emperor-symbol-local",
+          "label": "Emperor Symbol local MIDI",
+          "path": "assets/midi/emperor-symbol.local.mid",
+          "source": "local-placeholder",
+          "optional": true,
+          "visual_pulse": {
+            "enabled": true,
+            "bpm": 92,
+            "pattern": "signal",
+            "color": "seafoam",
+            "accent_every": 4
+          },
+          "notes": [
+            "Placeholder registration path only; add a rights-cleared local file before enabling MIDI playback."
+          ]
+        }
+      ],
+      "tags": [
+        "constitution",
+        "article-1"
+      ]
     }
   ]
 }

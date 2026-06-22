@@ -63,6 +63,56 @@ func TestLoadSeedContent(t *testing.T) {
 	}
 }
 
+func TestLoadConstitutionPlayableContent(t *testing.T) {
+	library, report, err := LoadFile(filepath.Join("..", "..", "content", "constitution-preamble-article1-playable.json"))
+	if err != nil {
+		t.Fatalf("load constitution content: %v", err)
+	}
+	if report.HasErrors() {
+		t.Fatalf("constitution content has validation errors: %#v", report.Issues)
+	}
+
+	if len(library.Documents) != 1 || library.Documents[0].ID != "jp-constitution" {
+		t.Fatalf("documents = %#v, want jp-constitution", library.Documents)
+	}
+	if got := len(library.Levels); got != 2 {
+		t.Fatalf("level count = %d, want 2", got)
+	}
+	if library.Levels[0].ID != "constitution-preamble-1" || library.Levels[1].ID != "constitution-article-1" {
+		t.Fatalf("level ids = %#v", library.Levels)
+	}
+
+	cards := indexCardsByTextKana(library.Cards)
+	for _, want := range []struct {
+		text string
+		kana string
+	}{
+		{text: "日本国民は", kana: "にほんこくみんは"},
+		{text: "正当に選挙された", kana: "せいとうにせんきょされた"},
+		{text: "国会", kana: "こっかい"},
+		{text: "主権", kana: "しゅけん"},
+		{text: "第一条", kana: "だいいちじょう"},
+		{text: "天皇", kana: "てんのう"},
+		{text: "象徴", kana: "しょうちょう"},
+	} {
+		if _, ok := cards[want.text+"\x00"+want.kana]; !ok {
+			t.Fatalf("missing constitution card text=%q kana=%q", want.text, want.kana)
+		}
+	}
+
+	for _, card := range library.Cards {
+		if !card.Playable {
+			t.Fatalf("constitution card %q should be playable", card.ID)
+		}
+		if card.Reading.Kana == "" {
+			t.Fatalf("constitution card %q missing kana", card.ID)
+		}
+		if card.SourceRef == "" {
+			t.Fatalf("constitution card %q missing source_ref", card.ID)
+		}
+	}
+}
+
 func TestValidateMarksMissingKanaUnplayable(t *testing.T) {
 	library := &Library{
 		Cards: []Card{{

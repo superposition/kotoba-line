@@ -17,7 +17,15 @@ import (
 	tuitransition "github.com/superposition/kotoba-line/internal/tui/transition"
 )
 
-const seedContentFile = "seed-2026-06-22.json"
+const (
+	starterLevelID      = "journal-2026-06-22-key-readings"
+	constitutionLevelID = "constitution-preamble-1"
+)
+
+var playableContentFiles = []string{
+	"seed-2026-06-22.json",
+	"constitution-preamble-article1-playable.json",
+}
 
 type screenMode string
 
@@ -37,9 +45,12 @@ type Model struct {
 	username string
 	width    int
 	height   int
+	library  *content.Library
 	mode     screenMode
 	drill    game.Drill
 	boss     boss.Fight
+	levelID  string
+	level    string
 	input    string
 	last     string
 	hint     string
@@ -59,7 +70,7 @@ func New(opts Options) Model {
 	library := opts.Library
 	loadErr := ""
 	if library == nil {
-		loaded, report, err := loadSeedContent()
+		loaded, report, err := loadPlayableContent()
 		if err != nil {
 			loadErr = fmt.Sprintf("seed content unavailable: %v", err)
 		} else if report.HasErrors() {
@@ -71,9 +82,12 @@ func New(opts Options) Model {
 
 	model := Model{
 		username: username,
+		library:  library,
 		mode:     modeDrill,
-		drill:    game.NewDrill(library, game.Config{SpawnEvery: 6, MaxEnemies: 3}).Start(),
+		drill:    newLevelDrill(library, starterLevelID),
 		boss:     boss.NewFight(newDocumentBoss(library)),
+		levelID:  starterLevelID,
+		level:    levelTitle(library, starterLevelID, "Tide Gate"),
 		loadErr:  loadErr,
 	}
 	if !opts.DisableEventLog {
@@ -101,6 +115,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "b":
 			m = m.enterBoss()
+		case "c":
+			m = m.switchLevel(constitutionLevelID)
+		case "j":
+			m = m.switchLevel(starterLevelID)
 		case "esc":
 			m.mode = modeDrill
 			m.input = ""
@@ -114,7 +132,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "backspace", "ctrl+h":
 			m.input = trimLastRune(m.input)
-		case "?":
+		case "?", "？":
 			if m.mode == modeBoss {
 				m = m.showBossHint()
 			} else {
@@ -140,7 +158,7 @@ func (m Model) View() string {
 		"",
 		fmt.Sprintf("Player: %s", m.username),
 		"",
-		"Station 01: Tide Gate",
+		fmt.Sprintf("Station: %s", m.level),
 	}
 
 	if m.loadErr != "" {
@@ -211,6 +229,28 @@ func (m Model) showHint() Model {
 	return m
 }
 
+func (m Model) switchLevel(levelID string) Model {
+	if m.library == nil {
+		m.last = "level unavailable"
+		return m
+	}
+	drill := newLevelDrill(m.library, levelID)
+	if drill.DeckSize() == 0 {
+		m.last = "level unavailable"
+		return m
+	}
+	m.mode = modeDrill
+	m.drill = drill
+	m.levelID = levelID
+	m.level = levelTitle(m.library, levelID, levelID)
+	m.input = ""
+	m.hint = ""
+	m.bossHint = ""
+	m.scene = renderScene(coretransition.SceneStationArrival, m.level, m.cardWidth())
+	m.last = fmt.Sprintf("LEVEL %s", m.level)
+	return m
+}
+
 func (m Model) enterBoss() Model {
 	m.mode = modeBoss
 	m.input = ""
@@ -276,7 +316,7 @@ func (m *Model) appendEvent(event statestore.Event) {
 func (m Model) drillCard(width int) string {
 	body := []string{
 		fmt.Sprintf("HIT %02d  MISS %02d  HINT %02d", m.drill.Hits(), m.drill.Misses(), m.drill.Hints()),
-		"b boss  ? hint  q quit",
+		"c constitution  j starter  b boss  ?/？ hint  q quit",
 	}
 
 	enemies := m.drill.Enemies()
@@ -465,8 +505,24 @@ func centerLine(text string, width int) string {
 	return strings.Repeat(" ", left) + text + strings.Repeat(" ", right)
 }
 
-func loadSeedContent() (*content.Library, content.ValidationReport, error) {
-	candidates := seedContentCandidates()
+func loadPlayableContent() (*content.Library, content.ValidationReport, error) {
+	var merged content.Library
+	for _, name := range playableContentFiles {
+		library, report, err := loadPlayableContentFile(name)
+		if err != nil {
+			return nil, content.ValidationReport{}, err
+		}
+		if report.HasErrors() {
+			return nil, report, nil
+		}
+		appendLibrary(&merged, library)
+	}
+	report := content.ValidateLibrary(&merged)
+	return &merged, report, nil
+}
+
+func loadPlayableContentFile(name string) (*content.Library, content.ValidationReport, error) {
+	candidates := contentFileCandidates(name)
 	var lastErr error
 	for _, candidate := range candidates {
 		library, report, err := content.LoadFile(candidate)
@@ -478,19 +534,68 @@ func loadSeedContent() (*content.Library, content.ValidationReport, error) {
 	return nil, content.ValidationReport{}, lastErr
 }
 
-func seedContentCandidates() []string {
-	candidates := []string{filepath.Join("content", seedContentFile)}
+func contentFileCandidates(name string) []string {
+	candidates := []string{filepath.Join("content", name)}
 	wd, err := os.Getwd()
 	if err != nil {
 		return candidates
 	}
 
 	for dir := wd; ; dir = filepath.Dir(dir) {
-		candidates = append(candidates, filepath.Join(dir, "content", seedContentFile))
+		candidates = append(candidates, filepath.Join(dir, "content", name))
 		parent := filepath.Dir(dir)
 		if parent == dir {
 			break
 		}
 	}
 	return candidates
+}
+
+func appendLibrary(dst *content.Library, src *content.Library) {
+	if src == nil {
+		return
+	}
+	dst.Cards = append(dst.Cards, src.Cards...)
+	dst.Documents = append(dst.Documents, src.Documents...)
+	dst.Levels = append(dst.Levels, src.Levels...)
+	dst.Campaigns = append(dst.Campaigns, src.Campaigns...)
+}
+
+func newLevelDrill(library *content.Library, levelID string) game.Drill {
+	return game.NewDrillFromCards(levelCards(library, levelID), game.Config{SpawnEvery: 6, MaxEnemies: 3}).Start()
+}
+
+func levelCards(library *content.Library, levelID string) []content.Card {
+	if library == nil {
+		return nil
+	}
+	cardIndex := make(map[string]content.Card, len(library.Cards))
+	for _, card := range library.Cards {
+		cardIndex[card.ID] = card
+	}
+	for _, level := range library.Levels {
+		if level.ID != levelID {
+			continue
+		}
+		cards := make([]content.Card, 0, len(level.CardIDs))
+		for _, cardID := range level.CardIDs {
+			if card, ok := cardIndex[cardID]; ok {
+				cards = append(cards, card)
+			}
+		}
+		return cards
+	}
+	return library.Cards
+}
+
+func levelTitle(library *content.Library, levelID, fallback string) string {
+	if library == nil {
+		return fallback
+	}
+	for _, level := range library.Levels {
+		if level.ID == levelID && strings.TrimSpace(level.Title) != "" {
+			return level.Title
+		}
+	}
+	return fallback
 }
