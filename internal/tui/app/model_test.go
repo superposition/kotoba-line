@@ -200,8 +200,11 @@ func TestExistingBuiltInProgressSkipsNewKanaFoundationOnResume(t *testing.T) {
 	if model.levelID != "lesson-hi-readings" {
 		t.Fatalf("levelID = %q, want existing progress to resume 日 readings", model.levelID)
 	}
-	if view := atoms.StripANSI(model.openStations().View()); !strings.Contains(view, "continue  Lesson 1 - 日 Readings") {
-		t.Fatalf("route should keep existing learner on 日 path:\n%s", view)
+	view := atoms.StripANSI(model.openStations().View())
+	for _, want := range []string{"continue  Kana 1 - Hiragana A/K/S/T/N", "> 01 OPEN   Kana 1 - Hiragana A/K/S/T/N"} {
+		if !strings.Contains(view, want) {
+			t.Fatalf("route map should focus optional kana practice, missing %q:\n%s", want, view)
+		}
 	}
 }
 

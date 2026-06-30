@@ -622,6 +622,13 @@ func (m Model) stationFocusIndex(options []levelOption) int {
 		return 0
 	}
 	current := indexLevelOption(options, m.levelID)
+	if current < len(options) && !isKanaFoundationLevelID(options[current].LevelID) {
+		for index, option := range options {
+			if isKanaFoundationLevelID(option.LevelID) && !option.Locked && !option.Complete {
+				return index
+			}
+		}
+	}
 	if current < len(options) && !options[current].Locked && !options[current].Complete {
 		return current
 	}
