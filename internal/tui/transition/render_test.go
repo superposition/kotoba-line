@@ -24,19 +24,23 @@ func TestRenderQueueKeepsSceneAndFrameOrder(t *testing.T) {
 
 	joined := strings.Join(stripFrames(frames), "\n")
 	assertInOrder(t, joined, []string{
-		"CARD MASTERY",
+		"NEXT WORD",
 		"card-hi",
-		"STATION ARRIVAL",
+		"WAVE START",
 		"station-01",
-		"BOSS INTRO",
+		"BOSS",
 		"article-one",
-		"BOSS CRACK",
 		"CRACK",
-		"LEVEL CLEAR",
+		"WAVE CLEAR",
 	})
+	for _, unwanted := range []string{"POWER UP", "weapon charge", "combo flare"} {
+		if strings.Contains(joined, unwanted) {
+			t.Fatalf("rendered frames should not include old charge copy %q:\n%s", unwanted, joined)
+		}
+	}
 }
 
-func TestRenderFrameWidthsAndMetadata(t *testing.T) {
+func TestRenderFrameWidthsAndNoDebugMetadata(t *testing.T) {
 	scene, ok := core.SceneFor(core.SceneBossCrack, "boss-a")
 	if !ok {
 		t.Fatalf("missing boss crack scene")
@@ -50,9 +54,14 @@ func TestRenderFrameWidthsAndMetadata(t *testing.T) {
 	}
 
 	plain := atoms.StripANSI(rendered)
-	for _, want := range []string{"BOSS CRACK", "fracture", "110ms/440ms", "boss-a", "CRACK"} {
+	for _, want := range []string{"CRACK", "fracture", "boss-a"} {
 		if !strings.Contains(plain, want) {
 			t.Fatalf("rendered frame missing %q in:\n%s", want, plain)
+		}
+	}
+	for _, unwanted := range []string{"queued NES ocean transition", "110ms/440ms"} {
+		if strings.Contains(plain, unwanted) {
+			t.Fatalf("rendered frame should not expose debug metadata %q:\n%s", unwanted, plain)
 		}
 	}
 }

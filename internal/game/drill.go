@@ -2,8 +2,10 @@ package game
 
 import (
 	"strings"
+	"time"
 
 	"github.com/superposition/kotoba-line/internal/content"
+	"github.com/superposition/kotoba-line/internal/kana"
 )
 
 const (
@@ -14,13 +16,16 @@ const (
 type Config struct {
 	SpawnEvery int
 	MaxEnemies int
+	Seed       uint64
 }
 
 type Drill struct {
 	deck       []content.Card
 	deckIndex  int
+	lastCardID string
 	enemies    []Enemy
 	nextID     int
+	rng        uint64
 	tick       int
 	spawnEvery int
 	maxEnemies int
@@ -77,6 +82,10 @@ func NewDrillFromCards(cards []content.Card, cfg Config) Drill {
 	if maxEnemies <= 0 {
 		maxEnemies = defaultMaxEnemies
 	}
+	seed := cfg.Seed
+	if seed == 0 {
+		seed = uint64(time.Now().UnixNano())
+	}
 
 	deck := make([]content.Card, 0, len(cards))
 	for _, card := range cards {
@@ -88,6 +97,7 @@ func NewDrillFromCards(cards []content.Card, cfg Config) Drill {
 	return Drill{
 		deck:       deck,
 		nextID:     1,
+		rng:        seed,
 		spawnEvery: spawnEvery,
 		maxEnemies: maxEnemies,
 	}
@@ -114,7 +124,9 @@ func (d Drill) Spawn() (Drill, bool) {
 		return d, false
 	}
 
-	card := d.deck[d.deckIndex%len(d.deck)]
+	var random uint64
+	d, random = d.nextRandom()
+	card := d.pickCard(int(random % uint64(len(d.deck))))
 	enemy := Enemy{
 		ID:         d.nextID,
 		CardID:     card.ID,
@@ -128,8 +140,41 @@ func (d Drill) Spawn() (Drill, bool) {
 
 	d.nextID++
 	d.deckIndex++
+	d.lastCardID = card.ID
 	d.enemies = append(d.enemies, enemy)
 	return d, true
+}
+
+func (d Drill) pickCard(start int) content.Card {
+	if len(d.deck) == 1 {
+		return d.deck[0]
+	}
+	active := make(map[string]bool, len(d.enemies))
+	for _, enemy := range d.enemies {
+		active[enemy.CardID] = true
+	}
+	for offset := 0; offset < len(d.deck); offset++ {
+		card := d.deck[(start+offset)%len(d.deck)]
+		if active[card.ID] || card.ID == d.lastCardID {
+			continue
+		}
+		return card
+	}
+	for offset := 0; offset < len(d.deck); offset++ {
+		card := d.deck[(start+offset)%len(d.deck)]
+		if !active[card.ID] {
+			return card
+		}
+	}
+	return d.deck[start%len(d.deck)]
+}
+
+func (d Drill) nextRandom() (Drill, uint64) {
+	if d.rng == 0 {
+		d.rng = 1
+	}
+	d.rng = d.rng*6364136223846793005 + 1442695040888963407
+	return d, d.rng
 }
 
 func (d Drill) SubmitKana(input string) (Drill, AnswerResult) {
@@ -140,7 +185,7 @@ func (d Drill) SubmitKana(input string) (Drill, AnswerResult) {
 	}
 
 	for i, enemy := range d.enemies {
-		if enemy.Kana != answer {
+		if !kana.MatchesAnswer(enemy.Kana, enemy.RomajiHint, answer) {
 			continue
 		}
 
@@ -156,6 +201,32 @@ func (d Drill) SubmitKana(input string) (Drill, AnswerResult) {
 		result.Enemy = target
 	}
 	result.Status = AnswerMiss
+	return d, result
+}
+
+func (d Drill) SubmitTargetKana(input string) (Drill, AnswerResult) {
+	answer := strings.TrimSpace(input)
+	result := AnswerResult{Status: AnswerEmpty, Input: answer}
+	if answer == "" {
+		return d, result
+	}
+
+	target, ok := d.Target()
+	if !ok {
+		d.misses++
+		result.Status = AnswerMiss
+		return d, result
+	}
+	result.Enemy = target
+	if !kana.MatchesAnswer(target.Kana, target.RomajiHint, answer) {
+		d.misses++
+		result.Status = AnswerMiss
+		return d, result
+	}
+
+	d.enemies = d.enemies[1:]
+	d.hits++
+	result.Status = AnswerHit
 	return d, result
 }
 

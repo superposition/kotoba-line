@@ -1,7 +1,6 @@
 package transition
 
 import (
-	"fmt"
 	"strings"
 
 	core "github.com/superposition/kotoba-line/internal/transition"
@@ -31,9 +30,8 @@ func RenderFrame(scene core.QueuedScene, frame core.Frame, index, width int) str
 
 	return atoms.Card(atoms.CardSpec{
 		Title:     scene.Definition.Title,
-		Subtitle:  fmt.Sprintf("%s %03dms/%03dms", frame.ID, scene.Definition.FrameMS, scene.Definition.DurationMS),
+		Subtitle:  frame.ID,
 		Body:      body,
-		Footer:    "queued NES ocean transition",
 		Width:     width,
 		Highlight: isImpact(scene.Definition.ID),
 	})
@@ -41,10 +39,14 @@ func RenderFrame(scene core.QueuedScene, frame core.Frame, index, width int) str
 
 func impactLine(sceneID core.SceneID, width, tick int) string {
 	switch sceneID {
+	case core.SceneAnswerHit:
+		return atoms.StripANSI(atoms.Flash("BLAST", width, 1, tick))
+	case core.SceneAnswerMiss:
+		return atoms.StripANSI(atoms.Flash("MISS", width, 1, tick))
 	case core.SceneCardMastery:
-		return atoms.StripANSI(atoms.Flash("MASTER", width, 1, tick))
+		return atoms.StripANSI(atoms.Flash("POWER", width, 1, tick))
 	case core.SceneBossIntro:
-		return atoms.StripANSI(atoms.Flash("WARNING", width, 1, tick))
+		return atoms.StripANSI(atoms.Flash("BOSS", width, 1, tick))
 	case core.SceneBossCrack:
 		return atoms.StripANSI(atoms.Flash("CRACK", width, 1, tick))
 	case core.SceneLevelClear:
@@ -55,7 +57,9 @@ func impactLine(sceneID core.SceneID, width, tick int) string {
 }
 
 func isImpact(sceneID core.SceneID) bool {
-	return sceneID == core.SceneCardMastery ||
+	return sceneID == core.SceneAnswerHit ||
+		sceneID == core.SceneAnswerMiss ||
+		sceneID == core.SceneCardMastery ||
 		sceneID == core.SceneBossIntro ||
 		sceneID == core.SceneBossCrack ||
 		sceneID == core.SceneLevelClear

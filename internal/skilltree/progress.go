@@ -9,7 +9,7 @@ const (
 	StatusMastered   Status = "mastered"
 )
 
-const MasteryStreak = 3
+const MasteryStreak = 1
 
 // Progress is the state adapter shape expected from a durable state package.
 // Until that package exists, tests and callers can use MapProgress.

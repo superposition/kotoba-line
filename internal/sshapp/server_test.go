@@ -11,7 +11,9 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	charmssh "github.com/charmbracelet/ssh"
+	"github.com/superposition/kotoba-line/internal/tui/atoms"
 	gossh "golang.org/x/crypto/ssh"
 )
 
@@ -55,9 +57,16 @@ func TestServerRendersTUIOverPTY(t *testing.T) {
 		t.Fatalf("start shell session: %v", err)
 	}
 
-	output := waitForOutput(t, stdout, "Kotoba Line")
-	if !strings.Contains(output, "Player: player") {
-		t.Fatalf("TUI output missing player:\n%s", output)
+	output := waitForOutput(t, stdout, "KOTOBA BEACH")
+	for _, want := range []string{"SURF RUN", "goal    catch the kana wave", "sound", "[ keys _"} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("TUI output missing %q:\n%s", want, output)
+		}
+	}
+	for _, bad := range []string{"SHELVES", "DOCUMENT", "TREE", "SQLite Lesson", "next key", "press   ["} {
+		if strings.Contains(output, bad) {
+			t.Fatalf("TUI output should not show noisy marker %q:\n%s", bad, output)
+		}
 	}
 
 	if _, err := stdin.Write([]byte("q")); err != nil {
@@ -90,6 +99,39 @@ func TestServerRejectsRemoteCommand(t *testing.T) {
 	}
 }
 
+func TestGameplayModelMergesSeededLessonsAndDocumentRoutes(t *testing.T) {
+	cfg := Config{StateDBPath: filepath.Join(t.TempDir(), "kotoba.sqlite")}
+	var warnings []string
+	model := tea.Model(NewGameplayModel("player", cfg, func(message string) {
+		warnings = append(warnings, message)
+	}))
+
+	model = updateGameplayModel(t, model, tea.WindowSizeMsg{Width: 120, Height: 80})
+	model = updateGameplayModel(t, model, tea.KeyMsg{Type: tea.KeyEsc})
+
+	plain := atoms.StripANSI(model.View())
+	for _, want := range []string{
+		"DOCUMENTS",
+		"Lesson 1 - 日 Readings",
+		"KANJI GRID",
+	} {
+		if !strings.Contains(plain, want) {
+			t.Fatalf("hosted route map missing %q:\n%s", want, plain)
+		}
+	}
+
+	for i := 0; i < 70 && !strings.Contains(plain, "Constitution Gate"); i++ {
+		model = updateGameplayModel(t, model, tea.KeyMsg{Type: tea.KeyDown})
+		plain = atoms.StripANSI(model.View())
+	}
+	if !strings.Contains(plain, "Constitution Gate") {
+		t.Fatalf("hosted route map never reached appended Constitution route:\n%s", plain)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("unexpected gameplay model warnings: %#v", warnings)
+	}
+}
+
 func startTestServer(t *testing.T) string {
 	t.Helper()
 
@@ -105,6 +147,7 @@ func startTestServer(t *testing.T) string {
 		User:        "player",
 		Password:    "kotoba",
 		HostKeyPath: filepath.Join(t.TempDir(), "ssh_host_ed25519"),
+		StateDBPath: filepath.Join(t.TempDir(), "kotoba.sqlite"),
 	}
 	server, err := NewServer(cfg)
 	if err != nil {
@@ -133,6 +176,15 @@ func startTestServer(t *testing.T) string {
 	})
 
 	return listener.Addr().String()
+}
+
+func updateGameplayModel(t *testing.T, model tea.Model, msg tea.Msg) tea.Model {
+	t.Helper()
+	updated, _ := model.Update(msg)
+	if updated == nil {
+		return model
+	}
+	return updated
 }
 
 func dialTestServer(addr string, user string, password string) (*gossh.Client, error) {

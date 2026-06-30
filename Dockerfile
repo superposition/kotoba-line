@@ -6,18 +6,17 @@ FROM golang:${GO_VERSION}-alpine AS build
 WORKDIR /src
 
 COPY go.mod go.sum ./
-RUN --mount=type=cache,id=go-mod,target=/go/pkg/mod go mod download
+RUN go mod download
 
 COPY . .
-RUN --mount=type=cache,id=go-build,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/kotoba-ssh ./cmd/kotoba-ssh
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/kotoba-ssh ./cmd/kotoba-ssh
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/kotoba-web ./cmd/kotoba-web
 
 FROM alpine:3.22
 WORKDIR /app
 
-ENV PORT=2222 \
-    KOTOBA_SSH_HOST=0.0.0.0 \
-    KOTOBA_SSH_HOST_KEY_PATH=/data/ssh_host_ed25519 \
+ENV PORT=8080 \
+    KOTOBA_HTTP_HOST=0.0.0.0 \
     KOTOBA_STATE_DIR=/data
 
 RUN apk add --no-cache ca-certificates && mkdir -p /data
@@ -27,19 +26,19 @@ cat > /usr/local/bin/kotoba-railway-start <<'SCRIPT'
 #!/bin/sh
 set -eu
 
-export KOTOBA_SSH_HOST="${KOTOBA_SSH_HOST:-0.0.0.0}"
-export KOTOBA_SSH_PORT="${KOTOBA_SSH_PORT:-${PORT:-2222}}"
-export KOTOBA_SSH_HOST_KEY_PATH="${KOTOBA_SSH_HOST_KEY_PATH:-/data/ssh_host_ed25519}"
+export KOTOBA_HTTP_HOST="${KOTOBA_HTTP_HOST:-0.0.0.0}"
+export KOTOBA_HTTP_PORT="${KOTOBA_HTTP_PORT:-${PORT:-8080}}"
 export KOTOBA_STATE_DIR="${KOTOBA_STATE_DIR:-/data}"
 
-exec /app/kotoba-ssh
+exec /app/kotoba-web
 SCRIPT
 chmod +x /usr/local/bin/kotoba-railway-start
 EOF
 
 COPY --from=build /out/kotoba-ssh /app/kotoba-ssh
+COPY --from=build /out/kotoba-web /app/kotoba-web
 COPY content /app/content
 
-EXPOSE 2222/tcp
+EXPOSE 8080/tcp
 
 CMD ["/usr/local/bin/kotoba-railway-start"]

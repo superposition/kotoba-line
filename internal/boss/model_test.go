@@ -53,11 +53,26 @@ func TestCorrectKanaChunkDamagesBossAndAdvancesTarget(t *testing.T) {
 	}
 }
 
+func TestKeyboardSyllablesDamageBossAndAdvanceTarget(t *testing.T) {
+	fight := NewFight(testBoss())
+
+	fight, result := fight.SubmitKana("nihon-kokumin-wa")
+	if result.Status != AnswerHit {
+		t.Fatalf("status = %q, want hit", result.Status)
+	}
+	if result.Chunk.ID != "nihon-kokumin-wa" {
+		t.Fatalf("chunk = %q, want nihon-kokumin-wa", result.Chunk.ID)
+	}
+	if result.Damage != 3 || fight.HP() != 6 {
+		t.Fatalf("damage/hp = %d/%d, want 3/6", result.Damage, fight.HP())
+	}
+}
+
 func TestWrongKanaDoesNotDamageOrAdvanceTarget(t *testing.T) {
 	fight := NewFight(testBoss())
 	beforeTarget, _ := fight.Target()
 
-	fight, result := fight.SubmitKana("nihon-kokumin-wa")
+	fight, result := fight.SubmitKana("wrong")
 	if result.Status != AnswerMiss {
 		t.Fatalf("status = %q, want miss", result.Status)
 	}
@@ -181,9 +196,9 @@ func testBoss() Boss {
 			{ID: "cleared", Title: "Cleared", Glyph: "憲", StartsAtHP: 0},
 		},
 		Chunks: []Chunk{
-			{ID: "nihon-kokumin-wa", Text: "日本国民は", Kana: "にほんこくみんは", Meaning: "the Japanese people", Damage: 3},
-			{ID: "shuken-ga", Text: "主権が", Kana: "しゅけんが", Meaning: "sovereign power", Damage: 3},
-			{ID: "kenpou", Text: "憲法", Kana: "けんぽう", Meaning: "constitution", Damage: 3},
+			{ID: "nihon-kokumin-wa", Text: "日本国民は", Kana: "にほんこくみんは", RomajiHint: "nihon-kokumin wa", Meaning: "the Japanese people", Damage: 3},
+			{ID: "shuken-ga", Text: "主権が", Kana: "しゅけんが", RomajiHint: "shuken ga", Meaning: "sovereign power", Damage: 3},
+			{ID: "kenpou", Text: "憲法", Kana: "けんぽう", RomajiHint: "kenpou", Meaning: "constitution", Damage: 3},
 		},
 	}
 }

@@ -113,6 +113,54 @@ func TestLoadConstitutionPlayableContent(t *testing.T) {
 	}
 }
 
+func TestLoadDefaultPlayableLibrary(t *testing.T) {
+	library, report, err := LoadDefaultPlayableLibrary()
+	if err != nil {
+		t.Fatalf("load default playable library: %v", err)
+	}
+	if report.HasErrors() {
+		t.Fatalf("default playable library has validation errors: %#v", report.Issues)
+	}
+
+	for _, want := range []string{
+		"journal-2026-06-22-key-readings",
+		"constitution-preamble-1",
+		"constitution-article-1",
+	} {
+		if !hasLevel(library, want) {
+			t.Fatalf("default playable library missing level %q", want)
+		}
+	}
+	if got, want := library.Campaigns[0].StartLevelID, "journal-2026-06-22-key-readings"; got != want {
+		t.Fatalf("first campaign start = %q, want %q", got, want)
+	}
+}
+
+func TestMergeLibrariesPreservesAppendOrder(t *testing.T) {
+	merged := MergeLibraries(
+		&Library{
+			Cards:     []Card{{ID: "a", Text: "一", Reading: Reading{Kana: "いち"}, Meaning: "one", Type: CardTypeWord}},
+			Documents: []Document{{ID: "doc-a", Title: "A"}},
+			Levels:    []Level{{ID: "level-a", Title: "A", CardIDs: []string{"a"}}},
+			Campaigns: []Campaign{{ID: "campaign-a", Title: "A", LevelIDs: []string{"level-a"}, StartLevelID: "level-a"}},
+		},
+		nil,
+		&Library{
+			Cards:     []Card{{ID: "b", Text: "二", Reading: Reading{Kana: "に"}, Meaning: "two", Type: CardTypeWord}},
+			Documents: []Document{{ID: "doc-b", Title: "B"}},
+			Levels:    []Level{{ID: "level-b", Title: "B", CardIDs: []string{"b"}}},
+			Campaigns: []Campaign{{ID: "campaign-b", Title: "B", LevelIDs: []string{"level-b"}, StartLevelID: "level-b"}},
+		},
+	)
+
+	if got := []string{merged.Cards[0].ID, merged.Cards[1].ID}; got[0] != "a" || got[1] != "b" {
+		t.Fatalf("merged card order = %#v, want a then b", got)
+	}
+	if report := ValidateLibrary(merged); report.HasErrors() {
+		t.Fatalf("merged library validation errors: %#v", report.Issues)
+	}
+}
+
 func TestValidateMarksMissingKanaUnplayable(t *testing.T) {
 	library := &Library{
 		Cards: []Card{{
@@ -136,6 +184,15 @@ func TestValidateMarksMissingKanaUnplayable(t *testing.T) {
 	if !library.Cards[0].NeedsReview {
 		t.Fatalf("card with missing kana should need review")
 	}
+}
+
+func hasLevel(library *Library, levelID string) bool {
+	for _, level := range library.Levels {
+		if level.ID == levelID {
+			return true
+		}
+	}
+	return false
 }
 
 func indexCardsByTextKana(cards []Card) map[string]Card {

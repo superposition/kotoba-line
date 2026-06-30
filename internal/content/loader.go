@@ -5,8 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+var defaultPlayableContentFiles = []string{
+	"seed-2026-06-22.json",
+	"constitution-preamble-article1-playable.json",
+}
 
 type ValidationSeverity string
 
@@ -47,6 +53,67 @@ func LoadJSON(r io.Reader) (*Library, ValidationReport, error) {
 
 	report := ValidateLibrary(&library)
 	return &library, report, nil
+}
+
+func LoadDefaultPlayableLibrary() (*Library, ValidationReport, error) {
+	libraries := make([]*Library, 0, len(defaultPlayableContentFiles))
+	for _, name := range defaultPlayableContentFiles {
+		library, report, err := loadDefaultPlayableFile(name)
+		if err != nil {
+			return nil, ValidationReport{}, err
+		}
+		if report.HasErrors() {
+			return nil, report, nil
+		}
+		libraries = append(libraries, library)
+	}
+
+	merged := MergeLibraries(libraries...)
+	report := ValidateLibrary(merged)
+	return merged, report, nil
+}
+
+func MergeLibraries(libraries ...*Library) *Library {
+	merged := &Library{}
+	for _, library := range libraries {
+		if library == nil {
+			continue
+		}
+		merged.Cards = append(merged.Cards, library.Cards...)
+		merged.Documents = append(merged.Documents, library.Documents...)
+		merged.Levels = append(merged.Levels, library.Levels...)
+		merged.Campaigns = append(merged.Campaigns, library.Campaigns...)
+	}
+	return merged
+}
+
+func loadDefaultPlayableFile(name string) (*Library, ValidationReport, error) {
+	var lastErr error
+	for _, candidate := range contentFileCandidates(name) {
+		library, report, err := LoadFile(candidate)
+		if err == nil {
+			return library, report, nil
+		}
+		lastErr = err
+	}
+	return nil, ValidationReport{}, lastErr
+}
+
+func contentFileCandidates(name string) []string {
+	candidates := []string{filepath.Join("content", name)}
+	wd, err := os.Getwd()
+	if err != nil {
+		return candidates
+	}
+
+	for dir := wd; ; dir = filepath.Dir(dir) {
+		candidates = append(candidates, filepath.Join(dir, "content", name))
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+	}
+	return candidates
 }
 
 func ValidateLibrary(library *Library) ValidationReport {
@@ -138,6 +205,9 @@ func ValidateLibrary(library *Library) ValidationReport {
 
 		reportUnknownCards(&report, path+".card_ids", level.ID, level.CardIDs, cardIDs)
 		reportUnknownCards(&report, path+".required_card_ids", level.ID, level.RequiredCardIDs, cardIDs)
+		if level.RequiredPoints < 0 {
+			report.add(ValidationError, "negative_required_points", "level required_points cannot be negative", path+".required_points", level.ID)
+		}
 	}
 
 	campaignIDs := make(map[string]struct{}, len(library.Campaigns))

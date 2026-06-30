@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/superposition/kotoba-line/internal/content"
+	"github.com/superposition/kotoba-line/internal/kana"
 )
 
 type Boss struct {
@@ -140,7 +141,7 @@ func (f Fight) SubmitKana(input string) (Fight, AnswerResult) {
 	}
 
 	result.Chunk = chunk
-	if chunk.Kana != answer {
+	if !kana.MatchesAnswer(chunk.Kana, chunk.RomajiHint, answer) {
 		f.misses++
 		result.Status = AnswerMiss
 		result.Events = []Event{{

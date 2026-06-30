@@ -5,6 +5,7 @@ import "fmt"
 type Progress struct {
 	Cards          map[string]CardProgress `json:"cards"`
 	UnlockedLevels map[string]bool         `json:"unlocked_levels"`
+	Points         int                     `json:"points"`
 }
 
 type CardProgress struct {
@@ -40,13 +41,9 @@ func (p *Progress) Apply(event Event) error {
 	switch event.Type {
 	case EventEnemyHit:
 		card := p.Cards[event.CardID]
-		if event.cleanHit() {
-			card.Streak++
-			if card.Streak >= MasteryCleanHitStreak {
-				card.Mastered = true
-			}
-		} else {
-			card.Streak = 0
+		card.Streak++
+		if card.Streak >= MasteryCleanHitStreak {
+			card.Mastered = true
 		}
 		p.Cards[event.CardID] = card
 	case EventEnemyMissed:
@@ -69,6 +66,8 @@ func (p *Progress) Apply(event Event) error {
 		p.Cards[event.CardID] = card
 	case EventLevelUnlocked:
 		p.UnlockedLevels[event.LevelID] = true
+	case EventPoints:
+		p.Points = clampPoints(p.Points + event.Points)
 	case EventBossIntro, EventBossDamaged, EventBossCleared:
 		// Boss events are replayed by transition views; progression is tracked by
 		// the underlying card hit and level unlock events.
@@ -84,4 +83,11 @@ func (p *Progress) ensureMaps() {
 	if p.UnlockedLevels == nil {
 		p.UnlockedLevels = map[string]bool{}
 	}
+}
+
+func clampPoints(points int) int {
+	if points < 0 {
+		return 0
+	}
+	return points
 }

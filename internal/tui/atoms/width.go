@@ -52,6 +52,18 @@ func FitDisplay(s string, width int) string {
 	return s + strings.Repeat(" ", width-DisplayWidth(s))
 }
 
+// FitStyledDisplay pads styled text to a visible width without stripping ANSI.
+// If text must be truncated, styling is dropped so escape sequences are not cut.
+func FitStyledDisplay(s string, width int) string {
+	if width <= 0 {
+		return ""
+	}
+	if DisplayWidth(s) > width {
+		return FitDisplay(s, width)
+	}
+	return s + strings.Repeat(" ", width-DisplayWidth(s))
+}
+
 // TruncateDisplay trims text without splitting a wide glyph across the boundary.
 func TruncateDisplay(s string, width int) string {
 	if width <= 0 {

@@ -7,22 +7,12 @@ import (
 	"github.com/superposition/kotoba-line/internal/content"
 )
 
-func TestHitMastersAfterThreeCleanHits(t *testing.T) {
+func TestHitMastersCard(t *testing.T) {
 	progress := Progress{Status: StatusDiscovered}
 
 	progress = Hit(progress)
-	if progress.Status != StatusTraining || progress.Streak != 1 {
-		t.Fatalf("first hit = %#v, want training streak 1", progress)
-	}
-
-	progress = Hit(progress)
-	if progress.Status != StatusTraining || progress.Streak != 2 {
-		t.Fatalf("second hit = %#v, want training streak 2", progress)
-	}
-
-	progress = Hit(progress)
 	if progress.Status != StatusMastered || progress.Streak != MasteryStreak {
-		t.Fatalf("third hit = %#v, want mastered streak %d", progress, MasteryStreak)
+		t.Fatalf("hit = %#v, want mastered streak %d", progress, MasteryStreak)
 	}
 }
 

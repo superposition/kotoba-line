@@ -10,6 +10,8 @@ import (
 type SceneID string
 
 const (
+	SceneAnswerHit      SceneID = "answer_hit"
+	SceneAnswerMiss     SceneID = "answer_miss"
 	SceneCardMastery    SceneID = "card_mastery"
 	SceneStationArrival SceneID = "station_arrival"
 	SceneBossIntro      SceneID = "boss_intro"
@@ -57,66 +59,87 @@ type QueuedScene struct {
 
 var sceneDefinitions = []Definition{
 	{
-		ID:         SceneCardMastery,
-		Title:      "CARD MASTERY",
-		DurationMS: 480,
-		FrameMS:    120,
+		ID:         SceneAnswerHit,
+		Title:      "BLAST",
+		DurationMS: 240,
+		FrameMS:    80,
 		Frames: []Frame{
-			{ID: "wake", Lines: []string{"~~~ combo tide ~~~", "CARD MASTERED", "{subject}"}},
-			{ID: "glow", Lines: []string{"*** coral flash ***", "glyph locks bright", "{subject}"}},
-			{ID: "stamp", Lines: []string{"[MASTER] [MASTER]", "seafoam seal set", "{subject}"}},
-			{ID: "fade", Lines: []string{"...wave fade...", "next card rises", "{subject}"}},
+			{ID: "shot", Lines: []string{"    |", "{subject}", "reading fired"}},
+			{ID: "burst", Lines: []string{"  * * *", "{subject}", "glyph burst"}},
+			{ID: "wake", Lines: []string{" ~~~~~", "{subject}", "wake fades"}},
+		},
+	},
+	{
+		ID:         SceneAnswerMiss,
+		Title:      "MISS",
+		DurationMS: 240,
+		FrameMS:    80,
+		Frames: []Frame{
+			{ID: "wide", Lines: []string{"  .", "{subject}", "shot wide"}},
+			{ID: "impact", Lines: []string{"!!!", "{subject}", "hull shakes"}},
+			{ID: "steady", Lines: []string{"...", "{subject}", "line holds"}},
+		},
+	},
+	{
+		ID:         SceneCardMastery,
+		Title:      "NEXT WORD",
+		DurationMS: 240,
+		FrameMS:    80,
+		Frames: []Frame{
+			{ID: "saved", Lines: []string{"OK", "{subject}", "saved"}},
+			{ID: "shift", Lines: []string{"-->", "{subject}", "next word"}},
+			{ID: "ready", Lines: []string{"READY", "{subject}", "type"}},
 		},
 	},
 	{
 		ID:         SceneStationArrival,
-		Title:      "STATION ARRIVAL",
+		Title:      "WAVE START",
 		DurationMS: 700,
 		FrameMS:    140,
 		Frames: []Frame{
-			{ID: "horizon", Lines: []string{"~~~~~ horizon ~~~~~", "station lights blink", "{subject}"}},
-			{ID: "signal", Lines: []string{"< < < SIGNAL > > >", "tide gate opens", "{subject}"}},
-			{ID: "dock", Lines: []string{"|== KOTOBA LINE ==|", "dock bell rings", "{subject}"}},
-			{ID: "map", Lines: []string{"o--o--O--o--o", "route dots pulse", "{subject}"}},
-			{ID: "ready", Lines: []string{"READY", "next drill board", "{subject}"}},
+			{ID: "horizon", Lines: []string{"~~~~~ ~~~~~", "{subject}", "ocean lane opens"}},
+			{ID: "signal", Lines: []string{"< < < > > >", "{subject}", "station signal"}},
+			{ID: "launch", Lines: []string{"|== KOTOBA BEACH ==|", "{subject}", "launch"}},
+			{ID: "map", Lines: []string{"o--o--O--o--o", "{subject}", "route lit"}},
+			{ID: "ready", Lines: []string{"READY", "{subject}", "fire readings"}},
 		},
 	},
 	{
 		ID:         SceneBossIntro,
-		Title:      "BOSS INTRO",
+		Title:      "BOSS",
 		DurationMS: 800,
 		FrameMS:    160,
 		Frames: []Frame{
-			{ID: "warning", Lines: []string{"!!! BOSS WAVE !!!", "deep navy alarm", "{subject}"}},
-			{ID: "shadow", Lines: []string{"######", "kanji shadow rises", "{subject}"}},
-			{ID: "emblem", Lines: []string{"<< BIG EMBLEM >>", "phrase shield online", "{subject}"}},
-			{ID: "tide", Lines: []string{"~~~~~", "ocean floor shakes", "{subject}"}},
-			{ID: "fight", Lines: []string{"FIGHT", "reading salvo armed", "{subject}"}},
+			{ID: "warning", Lines: []string{"!!! !!! !!!", "{subject}", "boss alarm"}},
+			{ID: "shadow", Lines: []string{"######", "{subject}", "glyph rises"}},
+			{ID: "emblem", Lines: []string{"<<        >>", "{subject}", "shield online"}},
+			{ID: "tide", Lines: []string{"~~~~~", "{subject}", "floor shakes"}},
+			{ID: "fight", Lines: []string{">>>", "{subject}", "break weak points"}},
 		},
 	},
 	{
 		ID:         SceneBossCrack,
-		Title:      "BOSS CRACK",
+		Title:      "CRACK",
 		DurationMS: 440,
 		FrameMS:    110,
 		Frames: []Frame{
-			{ID: "hit", Lines: []string{"HIT!", "coral damage flash", "{subject}"}},
-			{ID: "fracture", Lines: []string{"//// CRACK ////", "boss shell splits", "{subject}"}},
-			{ID: "spray", Lines: []string{"* * *", "seafoam burst", "{subject}"}},
-			{ID: "settle", Lines: []string{"HP drops", "emblem still floats", "{subject}"}},
+			{ID: "hit", Lines: []string{">>><<<", "{subject}", "coral snap"}},
+			{ID: "fracture", Lines: []string{"//// ////", "{subject}", "shell split"}},
+			{ID: "spray", Lines: []string{"* * * * *", "{subject}", "seafoam"}},
+			{ID: "settle", Lines: []string{"...", "{subject}", "still floating"}},
 		},
 	},
 	{
 		ID:         SceneLevelClear,
-		Title:      "LEVEL CLEAR",
+		Title:      "WAVE CLEAR",
 		DurationMS: 750,
 		FrameMS:    150,
 		Frames: []Frame{
-			{ID: "break", Lines: []string{"BOSS DOWN", "gate chain breaks", "{subject}"}},
-			{ID: "route", Lines: []string{"O==O==O==O", "ocean route complete", "{subject}"}},
-			{ID: "banner", Lines: []string{"LEVEL CLEAR", "yellow signal high", "{subject}"}},
-			{ID: "unlock", Lines: []string{"NEW STATION", "next tide unlocked", "{subject}"}},
-			{ID: "fade", Lines: []string{"...calm water...", "route memory glows", "{subject}"}},
+			{ID: "break", Lines: []string{"////", "{subject}", "shield gone"}},
+			{ID: "route", Lines: []string{"O==O==O==O", "{subject}", "route lit"}},
+			{ID: "banner", Lines: []string{"^^^^", "{subject}", "signal high"}},
+			{ID: "unlock", Lines: []string{"o--o--O", "{subject}", "next wave"}},
+			{ID: "fade", Lines: []string{"... ... ...", "{subject}", "calm"}},
 		},
 	},
 }

@@ -10,6 +10,8 @@ import (
 
 func TestDefinitionsCoverRequiredScenesWithBriefDurations(t *testing.T) {
 	want := []SceneID{
+		SceneAnswerHit,
+		SceneAnswerMiss,
 		SceneCardMastery,
 		SceneStationArrival,
 		SceneBossIntro,
@@ -64,16 +66,21 @@ func TestQueuePreservesOrderAndSceneContent(t *testing.T) {
 
 	content := queueContent(scenes)
 	for _, want := range []string{
-		"STATION ARRIVAL",
+		"WAVE START",
 		"station-01",
-		"CARD MASTERED",
+		"NEXT WORD",
 		"card-hi",
-		"BOSS WAVE",
+		"BOSS",
 		"CRACK",
-		"LEVEL CLEAR",
+		"WAVE CLEAR",
 	} {
 		if !strings.Contains(content, want) {
 			t.Fatalf("queued content missing %q in:\n%s", want, content)
+		}
+	}
+	for _, unwanted := range []string{"POWER UP", "weapon charge", "combo flare"} {
+		if strings.Contains(content, unwanted) {
+			t.Fatalf("queued content should not include old charge copy %q in:\n%s", unwanted, content)
 		}
 	}
 }

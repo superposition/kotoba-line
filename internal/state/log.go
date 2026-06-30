@@ -15,6 +15,17 @@ type EventLog struct {
 	path string
 }
 
+type EventStore interface {
+	Path() string
+	Append(Event) error
+	ReadAll() ([]Event, error)
+	Replay() (Progress, error)
+}
+
+type EventCounter interface {
+	EventCount() (int, error)
+}
+
 func NewEventLog(path string) EventLog {
 	return EventLog{path: path}
 }
@@ -91,6 +102,30 @@ func (l EventLog) Replay() (Progress, error) {
 	return ReplayEvents(events)
 }
 
+func SeedEventStoreFromEventLogIfEmpty(store interface {
+	EventStore
+	EventCounter
+}, log EventLog) (int, error) {
+	count, err := store.EventCount()
+	if err != nil {
+		return 0, err
+	}
+	if count > 0 || strings.TrimSpace(log.Path()) == "" {
+		return 0, nil
+	}
+
+	events, err := log.ReadAll()
+	if err != nil {
+		return 0, err
+	}
+	for _, event := range events {
+		if err := store.Append(event); err != nil {
+			return 0, err
+		}
+	}
+	return len(events), nil
+}
+
 func ReadEvents(reader io.Reader) ([]Event, error) {
 	scanner := bufio.NewScanner(reader)
 	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
@@ -128,6 +163,13 @@ func ValidateEvent(event Event) error {
 	case EventLevelUnlocked:
 		if event.LevelID == "" {
 			return fmt.Errorf("%s event requires level_id", event.Type)
+		}
+	case EventPoints:
+		if event.Points == 0 {
+			return fmt.Errorf("%s event requires nonzero points_delta", event.Type)
+		}
+		if strings.TrimSpace(event.Reason) == "" {
+			return fmt.Errorf("%s event requires reason", event.Type)
 		}
 	case EventBossIntro, EventBossCleared:
 		if event.BossID == "" {

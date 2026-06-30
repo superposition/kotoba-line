@@ -10,6 +10,9 @@ const (
 	CardTypeWeekday      CardType = "weekday"
 	CardTypePlaceName    CardType = "place_name"
 	CardTypePhrase       CardType = "phrase"
+	CardTypeKanaHiragana CardType = "kana_hiragana"
+	CardTypeKanaKatakana CardType = "kana_katakana"
+	CardTypeKanaCompare  CardType = "kana_comparison"
 )
 
 type Library struct {
@@ -60,6 +63,7 @@ type Level struct {
 	SectionID       string   `json:"section_id,omitempty"`
 	CardIDs         []string `json:"card_ids"`
 	RequiredCardIDs []string `json:"required_card_ids,omitempty"`
+	RequiredPoints  int      `json:"required_points,omitempty"`
 }
 
 type Campaign struct {

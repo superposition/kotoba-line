@@ -50,7 +50,7 @@ func Card(spec CardSpec) string {
 }
 
 func framedLine(text string, inner int, frame Color, style Style) string {
-	fit := FitDisplay(text, inner)
+	fit := FitStyledDisplay(text, inner)
 	return Paint(frame, "| ") + style.Apply(fit) + Paint(frame, " |")
 }
 

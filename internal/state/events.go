@@ -8,11 +8,12 @@ const (
 	EventHintRevealed  EventType = "hint_revealed"
 	EventCardMastered  EventType = "card_mastered"
 	EventLevelUnlocked EventType = "level_unlocked"
+	EventPoints        EventType = "points"
 	EventBossIntro     EventType = "boss_intro"
 	EventBossDamaged   EventType = "boss_damaged"
 	EventBossCleared   EventType = "boss_cleared"
 
-	MasteryCleanHitStreak = 3
+	MasteryCleanHitStreak = 1
 )
 
 type Event struct {
@@ -22,6 +23,8 @@ type Event struct {
 	BossID  string    `json:"boss_id,omitempty"`
 	HintID  string    `json:"hint_id,omitempty"`
 	Clean   *bool     `json:"clean,omitempty"`
+	Points  int       `json:"points_delta,omitempty"`
+	Reason  string    `json:"reason,omitempty"`
 }
 
 func EnemyHit(cardID string) Event {
@@ -62,6 +65,14 @@ func LevelUnlocked(levelID string) Event {
 	return Event{
 		Type:    EventLevelUnlocked,
 		LevelID: levelID,
+	}
+}
+
+func Points(delta int, reason string) Event {
+	return Event{
+		Type:   EventPoints,
+		Points: delta,
+		Reason: reason,
 	}
 }
 

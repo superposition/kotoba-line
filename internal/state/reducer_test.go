@@ -36,30 +36,23 @@ func TestReplayDeterminism(t *testing.T) {
 	}
 }
 
-func TestMissResetsStreak(t *testing.T) {
+func TestMissDoesNotEraseLearnedCard(t *testing.T) {
 	progress, err := ReplayEvents([]Event{
 		EnemyHit("card-a"),
-		EnemyHit("card-a"),
 		EnemyMissed("card-a"),
-		EnemyHit("card-a"),
 	})
 	if err != nil {
 		t.Fatalf("replay: %v", err)
 	}
 
 	card := progress.Cards["card-a"]
-	if card.Streak != 1 {
-		t.Fatalf("streak = %d, want 1", card.Streak)
-	}
-	if card.Mastered {
-		t.Fatalf("card should not be mastered after miss reset")
+	if !card.Mastered {
+		t.Fatalf("card should stay mastered after later miss")
 	}
 }
 
-func TestThreeCleanHitsMasterCard(t *testing.T) {
+func TestOneHitMastersCard(t *testing.T) {
 	progress, err := ReplayEvents([]Event{
-		EnemyHit("card-a"),
-		EnemyHit("card-a"),
 		EnemyHit("card-a"),
 	})
 	if err != nil {
@@ -71,27 +64,24 @@ func TestThreeCleanHitsMasterCard(t *testing.T) {
 		t.Fatalf("streak = %d, want %d", card.Streak, MasteryCleanHitStreak)
 	}
 	if !card.Mastered {
-		t.Fatalf("card should be mastered after 3 clean hits")
+		t.Fatalf("card should be mastered after one hit")
 	}
 }
 
-func TestUncleanHitBreaksMasteryStreak(t *testing.T) {
+func TestHintedHitCountsTowardMastery(t *testing.T) {
 	progress, err := ReplayEvents([]Event{
-		EnemyHit("card-a"),
 		EnemyHitWithClean("card-a", false),
-		EnemyHit("card-a"),
-		EnemyHit("card-a"),
 	})
 	if err != nil {
 		t.Fatalf("replay: %v", err)
 	}
 
 	card := progress.Cards["card-a"]
-	if card.Streak != 2 {
-		t.Fatalf("streak = %d, want 2", card.Streak)
+	if card.Streak != MasteryCleanHitStreak {
+		t.Fatalf("streak = %d, want %d", card.Streak, MasteryCleanHitStreak)
 	}
-	if card.Mastered {
-		t.Fatalf("card should not be mastered after an unclean hit breaks the streak")
+	if !card.Mastered {
+		t.Fatalf("hinted hit should still master card")
 	}
 }
 
@@ -130,6 +120,30 @@ func TestLevelUnlocksAreTracked(t *testing.T) {
 		if !progress.UnlockedLevels[levelID] {
 			t.Fatalf("level %q was not unlocked: %#v", levelID, progress.UnlockedLevels)
 		}
+	}
+}
+
+func TestPointsReplayClampsAtZero(t *testing.T) {
+	progress, err := ReplayEvents([]Event{
+		Points(120, "clean hit"),
+		Points(-25, "wipeout"),
+		Points(-500, "wipeout"),
+		Points(40, "hinted hit"),
+	})
+	if err != nil {
+		t.Fatalf("replay: %v", err)
+	}
+	if progress.Points != 40 {
+		t.Fatalf("points = %d, want 40", progress.Points)
+	}
+}
+
+func TestPointsRequireReason(t *testing.T) {
+	if err := ValidateEvent(Points(10, "")); err == nil {
+		t.Fatal("points event without reason validated")
+	}
+	if err := ValidateEvent(Points(0, "noop")); err == nil {
+		t.Fatal("zero points event validated")
 	}
 }
 

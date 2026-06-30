@@ -21,7 +21,7 @@ func TestRenderShowsStatusStreakPrerequisitesAndNextUnlocks(t *testing.T) {
 		"SKILL TREE",
 		"- Root",
 		"prereq: none",
-		"[mastered streak=3] 日 / ひ",
+		"[mastered streak=1] 日 / ひ",
 		"- Branch",
 		"prereq: root-a=mastered, root-b=mastered",
 		"[discovered streak=0] 日本 / にほん",

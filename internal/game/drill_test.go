@@ -30,16 +30,16 @@ func TestNewDrillSpawnsPlayableSeedCards(t *testing.T) {
 	if len(enemies) != 1 {
 		t.Fatalf("enemy count = %d, want 1", len(enemies))
 	}
-	if enemies[0].CardID != "journal-2026-06-22-hi" {
-		t.Fatalf("first enemy card = %q, want seed's first playable card", enemies[0].CardID)
+	if enemies[0].CardID == "" {
+		t.Fatalf("spawned enemy has no card id: %#v", enemies[0])
 	}
-	if enemies[0].Text != "日" || enemies[0].Kana != "ひ" || enemies[0].RomajiHint != "hi" {
+	if enemies[0].Text == "" || enemies[0].Kana == "" {
 		t.Fatalf("enemy did not copy seed card reading: %#v", enemies[0])
 	}
 }
 
 func TestTickMovesEnemiesAndSpawnsOnCadence(t *testing.T) {
-	drill := NewDrillFromCards(testCards(), Config{SpawnEvery: 2, MaxEnemies: 3}).Start()
+	drill := NewDrillFromCards(testCards(), Config{SpawnEvery: 2, MaxEnemies: 3, Seed: 1}).Start()
 
 	drill = drill.Tick()
 	enemies := drill.Enemies()
@@ -58,13 +58,16 @@ func TestTickMovesEnemiesAndSpawnsOnCadence(t *testing.T) {
 	if enemies[0].Row != 2 {
 		t.Fatalf("first enemy row after second tick = %d, want 2", enemies[0].Row)
 	}
-	if enemies[1].CardID != "nihon" || enemies[1].Row != 0 {
-		t.Fatalf("spawned enemy = %#v, want nihon at row 0", enemies[1])
+	if enemies[1].Row != 0 {
+		t.Fatalf("spawned enemy row = %#v, want row 0", enemies[1])
+	}
+	if enemies[1].CardID == enemies[0].CardID {
+		t.Fatalf("spawned enemy repeated active card despite alternatives: %#v", enemies)
 	}
 }
 
 func TestSubmitKanaDestroysExactMatchingEnemy(t *testing.T) {
-	drill := NewDrillFromCards(testCards(), Config{}).Start()
+	drill := NewDrillFromCards(testCards()[:1], Config{}).Start()
 
 	drill, result := drill.SubmitKana("ひ")
 	if result.Status != AnswerHit {
@@ -81,11 +84,26 @@ func TestSubmitKanaDestroysExactMatchingEnemy(t *testing.T) {
 	}
 }
 
+func TestSubmitKeyboardSyllablesDestroysMatchingEnemy(t *testing.T) {
+	drill := NewDrillFromCards(testCards()[1:], Config{}).Start()
+
+	drill, result := drill.SubmitKana("nihon")
+	if result.Status != AnswerHit {
+		t.Fatalf("SubmitKana status = %q, want hit", result.Status)
+	}
+	if result.Enemy.CardID != "nihon" {
+		t.Fatalf("hit enemy = %q, want nihon", result.Enemy.CardID)
+	}
+	if len(drill.Enemies()) != 0 {
+		t.Fatalf("hit should destroy matching enemy: %#v", drill.Enemies())
+	}
+}
+
 func TestWrongAnswerIsRejectedAndLeavesEnemy(t *testing.T) {
-	drill := NewDrillFromCards(testCards(), Config{}).Start()
+	drill := NewDrillFromCards(testCards()[:1], Config{}).Start()
 	before := drill.Enemies()[0]
 
-	drill, result := drill.SubmitKana("hi")
+	drill, result := drill.SubmitKana("wrong")
 	if result.Status != AnswerMiss {
 		t.Fatalf("SubmitKana status = %q, want miss", result.Status)
 	}
@@ -102,8 +120,29 @@ func TestWrongAnswerIsRejectedAndLeavesEnemy(t *testing.T) {
 	}
 }
 
+func TestSubmitTargetKanaOnlyGradesVisibleTarget(t *testing.T) {
+	drill := NewDrillFromCards(testCards(), Config{Seed: 7, MaxEnemies: 2}).Start()
+	drill, _ = drill.Spawn()
+	before := drill.Enemies()
+	if len(before) != 2 {
+		t.Fatalf("enemy count = %d, want 2", len(before))
+	}
+
+	drill, result := drill.SubmitTargetKana(before[1].Kana)
+	if result.Status != AnswerMiss {
+		t.Fatalf("SubmitTargetKana queued answer status = %q, want miss", result.Status)
+	}
+	if result.Enemy.CardID != before[0].CardID {
+		t.Fatalf("miss target = %q, want visible target %q", result.Enemy.CardID, before[0].CardID)
+	}
+	after := drill.Enemies()
+	if len(after) != 2 || after[0] != before[0] || after[1] != before[1] {
+		t.Fatalf("queued answer should not clear enemies: before=%#v after=%#v", before, after)
+	}
+}
+
 func TestHintReturnsRomajiWithoutCountingAsAnswer(t *testing.T) {
-	drill := NewDrillFromCards(testCards(), Config{}).Start()
+	drill := NewDrillFromCards(testCards()[:1], Config{}).Start()
 
 	drill, hint := drill.Hint()
 	if !hint.Available {
@@ -117,6 +156,24 @@ func TestHintReturnsRomajiWithoutCountingAsAnswer(t *testing.T) {
 	}
 	if drill.Hits() != 0 || drill.Misses() != 0 || drill.Hints() != 1 {
 		t.Fatalf("counts after hint = hits %d misses %d hints %d, want 0/0/1", drill.Hits(), drill.Misses(), drill.Hints())
+	}
+}
+
+func TestSpawnUsesPseudoRandomVarietyInsteadOfFixedDeckWalk(t *testing.T) {
+	drill := NewDrillFromCards(testCards(), Config{Seed: 7, MaxEnemies: 2}).Start()
+	first := drill.Enemies()[0].CardID
+
+	var spawned bool
+	drill, spawned = drill.Spawn()
+	if !spawned {
+		t.Fatalf("second spawn failed")
+	}
+	enemies := drill.Enemies()
+	if len(enemies) != 2 {
+		t.Fatalf("enemy count = %d, want 2", len(enemies))
+	}
+	if enemies[1].CardID == first {
+		t.Fatalf("second spawn repeated first card %q despite another card being available: %#v", first, enemies)
 	}
 }
 
