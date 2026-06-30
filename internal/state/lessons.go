@@ -334,11 +334,27 @@ func kanaFoundationLessonSeeds() []lessonSeed {
 			Cards:            kanaFoundationCards("lesson-kana-kata", kana.BasicRows()[5:], kana.ScriptKatakana),
 		},
 		{
-			ID:               kanaFoundationFinalLevelID,
-			Title:            "Kana 5 - Script Comparisons",
-			Description:      "Beat the lookalike traps by choosing the exact hiragana or katakana form.",
+			ID:               "lesson-kana-katakana-words",
+			Title:            "Kana 5 - Katakana Word Reps",
+			Description:      "Read common katakana words as katakana before mixing scripts again.",
 			DocumentTitle:    "Kana And 日 Foundation",
 			RequiredLessonID: "lesson-kana-katakana-late",
+			Cards:            katakanaWordCards(),
+		},
+		{
+			ID:               "lesson-kana-katakana-traps",
+			Title:            "Kana 6 - Katakana Lookalikes",
+			Description:      "Stay inside katakana and beat the shapes that blur together.",
+			DocumentTitle:    "Kana And 日 Foundation",
+			RequiredLessonID: "lesson-kana-katakana-words",
+			Cards:            katakanaTrapCards(),
+		},
+		{
+			ID:               kanaFoundationFinalLevelID,
+			Title:            "Kana 7 - Script Comparisons",
+			Description:      "Beat the lookalike traps by choosing the exact hiragana or katakana form.",
+			DocumentTitle:    "Kana And 日 Foundation",
+			RequiredLessonID: "lesson-kana-katakana-traps",
 			Cards:            kanaComparisonCards(),
 		},
 	}
@@ -381,6 +397,84 @@ func kanaFoundationCards(idPrefix string, rows []kana.Row, script kana.Script) [
 
 func kanaCardID(romaji string) string {
 	return strings.NewReplacer("'", "n", " ", "-", "_", "-").Replace(romaji)
+}
+
+func katakanaWordCards() []lessonCardSeed {
+	type word struct {
+		ID      string
+		Text    string
+		Kana    string
+		Romaji  string
+		Meaning string
+	}
+	words := []word{
+		{"kamera", "カメラ", "カメラ", "kamera", "camera"},
+		{"terebi", "テレビ", "テレビ", "terebi", "television"},
+		{"rajio", "ラジオ", "ラジオ", "rajio", "radio"},
+		{"hoteru", "ホテル", "ホテル", "hoteru", "hotel"},
+		{"basu", "バス", "バス", "basu", "bus"},
+		{"takushii", "タクシー", "タクシー", "takushii", "taxi"},
+		{"koohii", "コーヒー", "コーヒー", "koohii", "coffee"},
+		{"geemu", "ゲーム", "ゲーム", "geemu", "game"},
+		{"konbini", "コンビニ", "コンビニ", "konbini", "convenience store"},
+		{"resutoran", "レストラン", "レストラン", "resutoran", "restaurant"},
+		{"menyuu", "メニュー", "メニュー", "menyuu", "menu"},
+		{"nooto", "ノート", "ノート", "nooto", "notebook"},
+	}
+	cards := make([]lessonCardSeed, 0, len(words))
+	for _, item := range words {
+		cards = append(cards, lessonCardSeed{
+			ID:         "lesson-kana-kata-word-" + item.ID,
+			Text:       item.Text,
+			Kanji:      item.Text,
+			Kana:       item.Kana,
+			RomajiHint: item.Romaji,
+			Meaning:    item.Meaning,
+			Type:       content.CardTypeKanaKatakana,
+			Notes:      "katakana word rep|loanword shape practice",
+			Tags:       "sqlite|kana-foundation|katakana|word-reps",
+		})
+	}
+	return cards
+}
+
+func katakanaTrapCards() []lessonCardSeed {
+	type trap struct {
+		ID      string
+		Text    string
+		Kana    string
+		Romaji  string
+		Meaning string
+	}
+	traps := []trap{
+		{"shi-vs-tsu", "shi  シ / ツ", "シ", "shi", "katakana shi"},
+		{"tsu-vs-shi", "tsu  ツ / シ", "ツ", "tsu", "katakana tsu"},
+		{"so-vs-n", "so  ソ / ン", "ソ", "so", "katakana so"},
+		{"n-vs-so", "n  ン / ソ", "ン", "n", "katakana n"},
+		{"no-vs-so", "no  ノ / ソ", "ノ", "no", "katakana no"},
+		{"ku-vs-ke", "ku  ク / ケ", "ク", "ku", "katakana ku"},
+		{"ke-vs-ku", "ke  ケ / ク", "ケ", "ke", "katakana ke"},
+		{"nu-vs-su", "nu  ヌ / ス", "ヌ", "nu", "katakana nu"},
+		{"su-vs-nu", "su  ス / ヌ", "ス", "su", "katakana su"},
+		{"ma-vs-mu", "ma  マ / ム", "マ", "ma", "katakana ma"},
+		{"mu-vs-ma", "mu  ム / マ", "ム", "mu", "katakana mu"},
+		{"wa-vs-u", "wa  ワ / ウ", "ワ", "wa", "katakana wa"},
+	}
+	cards := make([]lessonCardSeed, 0, len(traps))
+	for _, item := range traps {
+		cards = append(cards, lessonCardSeed{
+			ID:         "lesson-kana-kata-trap-" + item.ID,
+			Text:       item.Text,
+			Kanji:      item.Text,
+			Kana:       item.Kana,
+			RomajiHint: item.Romaji,
+			Meaning:    item.Meaning,
+			Type:       content.CardTypeKanaKatakana,
+			Notes:      "katakana lookalike drill|same-script comparison",
+			Tags:       "sqlite|kana-foundation|katakana|lookalike",
+		})
+	}
+	return cards
 }
 
 func kanaComparisonCards() []lessonCardSeed {

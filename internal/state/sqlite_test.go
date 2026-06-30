@@ -149,8 +149,8 @@ func TestSeedDefaultLessonsStoresRealLessonLibrary(t *testing.T) {
 	if report.HasErrors() {
 		t.Fatalf("lesson library validation errors: %#v", report.Issues)
 	}
-	if len(library.Levels) != 60 {
-		t.Fatalf("level count = %d, want 60", len(library.Levels))
+	if len(library.Levels) != 62 {
+		t.Fatalf("level count = %d, want 62", len(library.Levels))
 	}
 	if got := library.Campaigns[0].StartLevelID; got != "lesson-kana-hiragana-early" {
 		t.Fatalf("start level = %q, want lesson-kana-hiragana-early", got)
@@ -165,6 +165,8 @@ func TestSeedDefaultLessonsStoresRealLessonLibrary(t *testing.T) {
 	for cardID, kana := range map[string]string{
 		"lesson-kana-hira-ka":                 "か",
 		"lesson-kana-kata-ka":                 "カ",
+		"lesson-kana-kata-word-kamera":        "カメラ",
+		"lesson-kana-kata-trap-so-vs-n":       "ソ",
 		"lesson-kana-compare-kata-shi-vs-tsu": "シ",
 		"lesson-hi-ka":                        "か",
 		"lesson-hi-ikimasu":                   "いきます",
@@ -191,6 +193,9 @@ func TestSeedDefaultLessonsStoresRealLessonLibrary(t *testing.T) {
 	}
 	if got := len(findLevel(t, library.Levels, "lesson-hi-readings").RequiredCardIDs); got != 14 {
 		t.Fatalf("日 readings requirements = %d, want comparison gate cards", got)
+	}
+	if got := len(findLevel(t, library.Levels, "lesson-kana-comparison").RequiredCardIDs); got != 12 {
+		t.Fatalf("script comparison requirements = %d, want katakana trap cards", got)
 	}
 	if got := findLevel(t, library.Levels, "lesson-hi-particles").RequiredPoints; got != 1200 {
 		t.Fatalf("particles required points = %d, want 1200", got)
@@ -242,8 +247,8 @@ func TestDefaultLessonLibraryDoesNotRequireSQLite(t *testing.T) {
 	if report.HasErrors() {
 		t.Fatalf("default lesson library validation errors: %#v", report.Issues)
 	}
-	if len(library.Levels) != 60 {
-		t.Fatalf("level count = %d, want 60", len(library.Levels))
+	if len(library.Levels) != 62 {
+		t.Fatalf("level count = %d, want 62", len(library.Levels))
 	}
 	if got := library.Campaigns[0].StartLevelID; got != "lesson-kana-hiragana-early" {
 		t.Fatalf("start level = %q, want lesson-kana-hiragana-early", got)
