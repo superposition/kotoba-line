@@ -82,6 +82,25 @@ func TestViewFitsStandardSSHViewport(t *testing.T) {
 	}
 }
 
+func TestPromptKeepsTargetSoundAndKeysTogether(t *testing.T) {
+	view := atoms.StripANSI(New(Options{Username: "player", Library: testLibrary(), DisableEventLog: true}).View())
+	targetIndex := strings.Index(view, "target")
+	soundIndex := strings.Index(view, "sound")
+	keysIndex := strings.Index(view, "[ keys")
+	meaningIndex := strings.Index(view, "meaning")
+	if targetIndex < 0 || soundIndex < 0 || keysIndex < 0 || meaningIndex < 0 {
+		t.Fatalf("prompt missing core lines:\n%s", view)
+	}
+	if !(targetIndex < soundIndex && soundIndex < keysIndex && keysIndex < meaningIndex) {
+		t.Fatalf("target/sound/keys should be clustered before meaning:\n%s", view)
+	}
+
+	betweenTargetAndKeys := view[targetIndex:keysIndex]
+	if strings.Contains(betweenTargetAndKeys, "meaning") || strings.Count(betweenTargetAndKeys, "\n") > 3 {
+		t.Fatalf("target/sound/keys cluster has too much separation:\n%s", view)
+	}
+}
+
 func TestKatakanaTargetProgressUsesKatakanaPreview(t *testing.T) {
 	if got := targetSoundProgress("カ", "ka"); got != "カ" {
 		t.Fatalf("targetSoundProgress(katakana ka) = %q, want カ", got)

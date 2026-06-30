@@ -1092,14 +1092,11 @@ func (m Model) promptSquareLines(width int) []string {
 		"goal    catch the kana wave",
 		"",
 		"target  " + targetText,
+		"sound   " + soundCue(target.Kana, sequence, m.input),
+		atoms.StripANSI(atoms.InputBar("keys", m.input, boxWidth-4, true)),
 		"",
 	}
 	body = append(body, prefixedCenterWrappedText("meaning ", target.Meaning, boxWidth-4)...)
-	body = append(body,
-		"",
-		"sound   "+soundCue(target.Kana, sequence, m.input),
-		atoms.StripANSI(atoms.InputBar("keys", m.input, boxWidth-4, true)),
-	)
 	if m.hint != "" {
 		body = append(body, prefixedCenterWrappedText("hint    ", strings.TrimPrefix(m.hint, "hint: "), boxWidth-4)...)
 	} else {
