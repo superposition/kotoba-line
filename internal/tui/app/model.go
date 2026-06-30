@@ -861,52 +861,29 @@ type clearTransition struct {
 }
 
 func (m Model) beginClearTransition(clear clearTransition) Model {
-	sceneID := coretransition.SceneCardMastery
-	if clear.LevelCleared || clear.FromLevel != clear.ToLevel || len(clear.Unlocked) > 0 {
-		sceneID = coretransition.SceneLevelClear
-	}
-	scene, _ := coretransition.SceneFor(sceneID, firstNonBlank(clear.CardText, clear.ToLevel, m.level))
 	returnMode := clear.ReturnMode
 	if returnMode == "" {
 		returnMode = modeDrill
 	}
 
-	lines := []string{
-		fmt.Sprintf("card    %s -> %s", clear.CardText, clear.CardKana),
-		fmt.Sprintf("points  %s  total %05d", signedPoints(clear.PointsDelta), m.score),
-	}
-	if clear.BeforeSetLine != "" {
-		lines = append(lines, "from    "+clear.BeforeSetLine)
-	}
-	if clear.AfterSetLine != "" {
-		lines = append(lines, "to      "+clear.AfterSetLine)
-	}
-	if clear.FromLevel != "" && clear.ToLevel != "" && clear.FromLevel != clear.ToLevel {
-		lines = append(lines, fmt.Sprintf("tree    %s -> %s", clear.FromLevel, clear.ToLevel))
+	feedback := fmt.Sprintf("saved %s %s", clear.CardText, signedPoints(clear.PointsDelta))
+	if clear.LevelCleared && clear.ToLevel != "" && clear.FromLevel != clear.ToLevel {
+		feedback = "lesson clear -> " + clear.ToLevel
+	} else if clear.LevelCleared && returnMode == modeStations {
+		feedback = "lesson clear -> route map"
 	}
 	for _, unlock := range clear.Unlocked {
-		lines = append(lines, "unlock  "+unlock.Title)
+		feedback += "  unlock " + unlock.Title
 	}
 	if returnMode == modeStations {
-		lines = append(lines, "next    enter to route map")
+		m = m.openStations()
+		m.last = feedback
+		return m
 	} else {
-		lines = append(lines, "next    type for next word")
+		m.mode = returnMode
 	}
-
-	m.mode = modeTransition
-	m.transition = transitionSummary{
-		Scene:       scene,
-		Subject:     clear.CardText,
-		PointsDelta: clear.PointsDelta,
-		TotalPoints: m.score,
-		FromLevel:   clear.FromLevel,
-		ToLevel:     clear.ToLevel,
-		SetBefore:   clear.BeforeSetLine,
-		SetAfter:    clear.AfterSetLine,
-		Unlocked:    clear.Unlocked,
-		Lines:       lines,
-		ReturnMode:  returnMode,
-	}
+	m.transition = transitionSummary{}
+	m.last = feedback
 	return m
 }
 
@@ -1022,6 +999,9 @@ func (m Model) branchRunLines(progress statestore.Progress, width int, bossMode 
 	if width < 40 {
 		width = 40
 	}
+	if !bossMode {
+		return m.promptSquareLines(width)
+	}
 	lines := []string{
 		styledBranchLine(width, m.hudStatusLine(width, bossMode), atoms.Style{Fg: atoms.Cyan, Bold: true}),
 		branchLine(width, ""),
@@ -1086,6 +1066,118 @@ func (m Model) activeExerciseHUDLines(progress statestore.Progress, width int, b
 		body = append(body, fmt.Sprintf("stats   hit %02d  wipe %02d  hint %02d", m.drill.Hits(), m.drill.Misses(), m.drill.Hints()))
 	}
 	return hudPanel("SURF RUN", body, width)
+}
+
+func (m Model) promptSquareLines(width int) []string {
+	target, ok := m.drill.Target()
+	boxWidth := clampInt(width-8, 36, 56)
+	if !ok {
+		body := promptSquareBody([]string{
+			"goal",
+			"waiting for the next wave",
+			"",
+			atoms.StripANSI(atoms.InputBar("keys", m.input, boxWidth-4, false)),
+		}, boxWidth-4)
+		return centerBlock(hudPanel("KOTOBA BEACH", body, boxWidth), width)
+	}
+
+	sequence := kana.TypingSequence(target.Kana, target.RomajiHint)
+	targetText := targetProgressText(target.Text, target.Kana, m.input)
+	feedback := firstNonBlank(m.last, "ready to surf")
+	if strings.HasPrefix(m.last, "wipeout") {
+		feedback = m.last
+	}
+
+	body := []string{
+		"goal    catch the kana wave",
+		"",
+		"target  " + targetText,
+		"",
+	}
+	body = append(body, prefixedCenterWrappedText("meaning ", target.Meaning, boxWidth-4)...)
+	body = append(body,
+		"",
+		"sound   "+soundCue(target.Kana, sequence, m.input),
+		atoms.StripANSI(atoms.InputBar("keys", m.input, boxWidth-4, true)),
+	)
+	if m.hint != "" {
+		body = append(body, prefixedCenterWrappedText("hint    ", strings.TrimPrefix(m.hint, "hint: "), boxWidth-4)...)
+	} else {
+		body = append(body, "hint    ? for kana/romaji")
+	}
+	body = append(body, "feedback "+feedback)
+	if m.logErr != "" {
+		body = append(body, "log "+m.logErr)
+	}
+	body = promptSquareBody(body, boxWidth-4)
+	lines := centerBlock(hudPanel("KOTOBA BEACH", body, boxWidth), width)
+	if m.height > 0 {
+		topPadding := (m.height - len(lines)) / 2
+		if topPadding > 0 {
+			padding := make([]string, topPadding)
+			lines = append(padding, lines...)
+		}
+	}
+	return lines
+}
+
+func promptSquareBody(lines []string, inner int) []string {
+	body := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if line == "" {
+			body = append(body, "")
+			continue
+		}
+		body = append(body, centerLine(line, inner))
+	}
+	for len(body) < 13 {
+		body = append(body, "")
+	}
+	return body
+}
+
+func centerWrappedText(text string, width int) []string {
+	chunks := wrapDisplayText(text, width, "")
+	if len(chunks) == 0 {
+		return []string{""}
+	}
+	for i, chunk := range chunks {
+		chunks[i] = centerLine(chunk, width)
+	}
+	return chunks
+}
+
+func prefixedCenterWrappedText(prefix, text string, width int) []string {
+	available := width - atoms.DisplayWidth(prefix)
+	if available < 12 {
+		return centerWrappedText(prefix+text, width)
+	}
+	chunks := wrapDisplayText(text, available, "")
+	if len(chunks) == 0 {
+		return []string{centerLine(prefix, width)}
+	}
+	lines := make([]string, 0, len(chunks))
+	for index, chunk := range chunks {
+		linePrefix := prefix
+		if index > 0 {
+			linePrefix = strings.Repeat(" ", atoms.DisplayWidth(prefix))
+		}
+		lines = append(lines, centerLine(linePrefix+chunk, width))
+	}
+	return lines
+}
+
+func centerBlock(lines []string, width int) []string {
+	centered := make([]string, 0, len(lines))
+	for _, line := range lines {
+		visible := atoms.DisplayWidth(line)
+		if visible >= width {
+			centered = append(centered, line)
+			continue
+		}
+		centered = append(centered, strings.Repeat(" ", (width-visible)/2)+line)
+	}
+	return centered
 }
 
 func targetSoundProgress(targetKana, input string) string {

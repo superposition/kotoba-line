@@ -20,12 +20,12 @@ func TestViewShowsInitialScreen(t *testing.T) {
 	if !strings.Contains(view, "\x1b[") {
 		t.Fatalf("View() should include seaside ANSI color styling:\n%s", view)
 	}
-	for _, want := range []string{"KOTOBA BEACH  player", "SURF", "points", "tide", "streak", "SURF RUN", "goal    catch the kana wave", "target", "sound   [", "[ keys _", "hint    ? for kana/romaji", "feedback ready to surf", "set     0/3 learned", "STREAK  ["} {
+	for _, want := range []string{"KOTOBA BEACH", "goal    catch the kana wave", "target", "meaning", "sound   [", "[ keys _", "hint    ? for kana/romaji", "feedback ready to surf"} {
 		if !strings.Contains(plain, want) {
 			t.Fatalf("View() missing %q:\n%s", want, view)
 		}
 	}
-	for _, bad := range []string{"before it hits shore", "SHELVES", "DOCUMENT", "TREE", "SQLite Lesson", "SKILL TREE", "DAG", "flowchart TD", "-->", ".->", "[\"", "study map", "exercise:", "Q: type kana reading", "queued:", "next key", "press   ["} {
+	for _, bad := range []string{"points", "tide", "streak", "STREAK", "before it hits shore", "SHELVES", "DOCUMENT", "TREE", "SQLite Lesson", "SKILL TREE", "DAG", "flowchart TD", "-->", ".->", "[\"", "study map", "exercise:", "Q: type kana reading", "queued:", "next key", "press   ["} {
 		if strings.Contains(plain, bad) {
 			t.Fatalf("View() should not render old card/sidebar marker %q:\n%s", bad, view)
 		}
@@ -67,7 +67,7 @@ func TestViewFitsStandardSSHViewport(t *testing.T) {
 	model, _ := New(Options{Library: testLibrary(), DisableEventLog: true}).Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	plain := atoms.StripANSI(model.(Model).View())
 
-	for _, want := range []string{"KOTOBA BEACH", "points", "tide", "SURF RUN", "[ keys _", "feedback"} {
+	for _, want := range []string{"KOTOBA BEACH", "goal    catch the kana wave", "target", "meaning", "[ keys _", "feedback"} {
 		if !strings.Contains(plain, want) {
 			t.Fatalf("80x24 view missing %q:\n%s", want, plain)
 		}
@@ -104,7 +104,7 @@ func TestNewReplaysSavedProgressOnStartup(t *testing.T) {
 	if model.levelID != "lesson-one" {
 		t.Fatalf("levelID = %q, want lesson-one", model.levelID)
 	}
-	if view := atoms.StripANSI(model.View()); !strings.Contains(view, "set     1/2 learned") {
+	if view := atoms.StripANSI(model.View()); !strings.Contains(view, "target") || strings.Contains(view, "set     ") {
 		t.Fatalf("startup view did not replay saved progress:\n%s", view)
 	}
 }
@@ -137,7 +137,7 @@ func TestNewResumesNextLessonAfterSavedCompletion(t *testing.T) {
 	if model.levelID != "lesson-two" {
 		t.Fatalf("levelID = %q, want lesson-two", model.levelID)
 	}
-	if view := atoms.StripANSI(model.View()); !strings.Contains(view, "target  二") || !strings.Contains(view, "set     0/1 learned") {
+	if view := atoms.StripANSI(model.View()); !strings.Contains(view, "target  二") || strings.Contains(view, "set     ") {
 		t.Fatalf("startup view did not resume next lesson:\n%s", view)
 	}
 }
@@ -160,7 +160,7 @@ func TestNewResumesBuiltInLessonAfterSavedCompletion(t *testing.T) {
 	if model.levelID != "lesson-hi-sentences" {
 		t.Fatalf("levelID = %q, want lesson-hi-sentences", model.levelID)
 	}
-	if view := atoms.StripANSI(model.View()); !strings.Contains(view, "set     0/4 learned") {
+	if view := atoms.StripANSI(model.View()); !strings.Contains(view, "target") || !strings.Contains(view, "meaning") {
 		t.Fatalf("startup view did not resume built-in lesson 3:\n%s", view)
 	}
 }
@@ -179,7 +179,7 @@ func TestNewBuiltInLibraryStartsOnKanaFoundation(t *testing.T) {
 		t.Fatalf("level = %q, want kana foundation title", model.level)
 	}
 	view := atoms.StripANSI(model.View())
-	for _, want := range []string{"goal    catch the kana wave", "set     0/25 learned"} {
+	for _, want := range []string{"goal    catch the kana wave", "target", "meaning"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("kana foundation startup missing %q:\n%s", want, view)
 		}
@@ -268,7 +268,7 @@ func TestCompletedBuiltInLessonFiveResumesN5VerbPack(t *testing.T) {
 		t.Fatalf("level = %q, want Lesson 6 - N5 Action Verbs", model.level)
 	}
 	view := atoms.StripANSI(model.View())
-	for _, want := range []string{"SURF RUN", "set     0/8 learned"} {
+	for _, want := range []string{"KOTOBA BEACH", "target", "meaning"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("completed lesson five should resume lesson six, missing %q:\n%s", want, view)
 		}
@@ -312,7 +312,7 @@ func TestCompletedBuiltInLessonEightResumesBeginner200Core(t *testing.T) {
 		t.Fatalf("level = %q", model.level)
 	}
 	view := atoms.StripANSI(model.View())
-	for _, want := range []string{"SURF RUN", "set     0/20 learned"} {
+	for _, want := range []string{"KOTOBA BEACH", "target", "meaning"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("completed lesson eight should resume beginner 200 core, missing %q:\n%s", want, view)
 		}
@@ -351,7 +351,7 @@ func TestCompletedFirstFiftyBeginnerKanjiResumesGroupSix(t *testing.T) {
 		t.Fatalf("target card = %q, want group six card", target.CardID)
 	}
 	view := atoms.StripANSI(model.View())
-	for _, want := range []string{"SURF RUN", "set     0/20 learned"} {
+	for _, want := range []string{"KOTOBA BEACH", "target", "meaning"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("completed first fifty should resume group six, missing %q:\n%s", want, view)
 		}
@@ -401,7 +401,7 @@ func TestLessonCompletionAutoAdvancesToNextLesson(t *testing.T) {
 		t.Fatalf("levelID after lesson completion = %q, want lesson-two", model.levelID)
 	}
 	view := atoms.StripANSI(model.View())
-	if !strings.Contains(view, "WAVE CLEAR") || !strings.Contains(view, "tree    Lesson One -> Lesson Two") || !strings.Contains(view, "points  +") {
+	if !strings.Contains(view, "feedback lesson clear -> Lesson Two") || strings.Contains(view, "WAVE CLEAR") {
 		t.Fatalf("view did not advance to next lesson:\n%s", view)
 	}
 }
@@ -411,16 +411,16 @@ func TestFinalLessonCompletionReturnsToRouteMap(t *testing.T) {
 	model := New(Options{Username: "player", Library: singleLessonLibrary(), EventLogPath: path})
 
 	model = masterCardClean(t, model, "single-a")
-	if model.mode != modeTransition {
-		t.Fatalf("mode after final completion = %q, want transition", model.mode)
+	if model.mode != modeStations {
+		t.Fatalf("mode after final completion = %q, want stations", model.mode)
 	}
 	if target, ok := model.drill.Target(); ok {
 		t.Fatalf("final completed lesson respawned target %q", target.CardID)
 	}
 	view := atoms.StripANSI(model.View())
-	for _, want := range []string{"WAVE CLEAR", "to      Only Wave 1/1", "next    enter to route map"} {
+	for _, want := range []string{"DOCUMENTS", "lesson clear -> route map"} {
 		if !strings.Contains(view, want) {
-			t.Fatalf("final clear transition missing %q:\n%s", want, view)
+			t.Fatalf("final clear route map missing %q:\n%s", want, view)
 		}
 	}
 
@@ -433,7 +433,7 @@ func TestFinalLessonCompletionReturnsToRouteMap(t *testing.T) {
 		t.Fatalf("mode after dismissing final clear = %q, want stations", model.mode)
 	}
 	view = atoms.StripANSI(model.View())
-	for _, want := range []string{"DOCUMENTS", "DONE   Only Wave", "ROUTE MAP"} {
+	for _, want := range []string{"DOCUMENTS", "DONE   Only Wave", "route clear"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("route map after final clear missing %q:\n%s", want, view)
 		}
@@ -547,7 +547,7 @@ func TestKanaInputHitAndHintActions(t *testing.T) {
 	if model.drill.Hits() != 1 || model.drill.Misses() != 0 {
 		t.Fatalf("typing counts = hits %d misses %d, want 1/0", model.drill.Hits(), model.drill.Misses())
 	}
-	if !strings.Contains(atoms.StripANSI(model.View()), "card    "+target.Text+" -> "+target.Kana) {
+	if !strings.Contains(atoms.StripANSI(model.View()), "feedback saved "+target.Text) {
 		t.Fatalf("hit not shown in view:\n%s", model.View())
 	}
 	if strings.Contains(atoms.StripANSI(model.View()), "BLAST") {
@@ -568,7 +568,7 @@ func TestKeyboardInputShowsKanaPreviewAndHits(t *testing.T) {
 	if model.drill.Hits() != 1 || model.drill.Misses() != 0 {
 		t.Fatalf("typing counts = hits %d misses %d, want 1/0", model.drill.Hits(), model.drill.Misses())
 	}
-	if !strings.Contains(atoms.StripANSI(model.View()), "card    日本 -> にほん") {
+	if !strings.Contains(atoms.StripANSI(model.View()), "feedback saved 日本") {
 		t.Fatalf("automatic keyboard hit not shown in view:\n%s", model.View())
 	}
 }
@@ -643,7 +643,7 @@ func TestDrillViewShowsTargetAndQueueWithoutRows(t *testing.T) {
 	model.drill, _ = model.drill.Spawn()
 
 	view := atoms.StripANSI(model.View())
-	for _, want := range []string{"SURF RUN", "goal    catch the kana wave", "target", "sound", "[ keys _", "feedback", "STREAK  ["} {
+	for _, want := range []string{"KOTOBA BEACH", "goal    catch the kana wave", "target", "meaning", "sound", "[ keys _", "feedback"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("drill view missing %q:\n%s", want, view)
 		}
@@ -692,20 +692,18 @@ func TestLongHintAndFeedbackWrapInsideHUD(t *testing.T) {
 	model = updated.(Model)
 	view := atoms.StripANSI(model.View())
 	for _, want := range []string{
-		"tree time     本日 / ほんじつ = today, formal",
-		"tree topic    は = marks what the sentence is about",
-		"tree adverb   誠に / まことに = truly, sincerely",
-		"tree thanks   ありがとう = thanks",
-		"tree polite   ございました = polite past finish",
+		"goal    catch the kana wave",
+		"target  本日は誠にありがとうございました",
+		"meaning Thank you very much today.",
 	} {
 		if !strings.Contains(view, want) {
-			t.Fatalf("sentence tree missing %q:\n%s", want, view)
+			t.Fatalf("center prompt missing %q:\n%s", want, view)
 		}
 	}
-	if treeIndex, feedbackIndex := strings.Index(view, "tree time"), strings.Index(view, "feedback"); treeIndex < feedbackIndex {
-		t.Fatalf("sentence tree should render below drill feedback:\n%s", view)
+	if strings.Contains(view, "tree time") || strings.Contains(view, "tree topic") {
+		t.Fatalf("drill prompt should not render sentence tree rows:\n%s", view)
 	}
-	for _, want := range []string{"hint    本日は誠にありがとうございました =", "hint    ほんじつはまことにありがとうございました", "hint    arigatou gozaimashita"} {
+	for _, want := range []string{"hint    本日は誠にありがとうございました =", "ほんじつはまことにありがとうございました", "arigatou"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("wrapped hint missing %q:\n%s", want, view)
 		}
@@ -715,7 +713,7 @@ func TestLongHintAndFeedbackWrapInsideHUD(t *testing.T) {
 	updated, _ = model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("honjitsuwaar")})
 	model = updated.(Model)
 	view = atoms.StripANSI(model.View())
-	for _, want := range []string{"target! [ほんじつ]はまことにありがとうございました", "sound!  ほんじつ [H]", "[ keys honjitsu _", "feedback wipeout W -5  [H]"} {
+	for _, want := range []string{"target  [ほんじつ]はまことにありがとうございました", "sound   ほんじつ [H]", "[ keys honjitsu _", "feedback wipeout W -5  [H]"} {
 		if !strings.Contains(view, want) {
 			t.Fatalf("wrapped feedback missing %q:\n%s", want, view)
 		}
@@ -1012,7 +1010,7 @@ func TestStationSelectorSwitchesUnlockedLevel(t *testing.T) {
 
 	view := atoms.StripANSI(model.View())
 	for _, want := range []string{
-		"SURF RUN",
+		"KOTOBA BEACH",
 		"target",
 		"feedback wave Article 1",
 	} {

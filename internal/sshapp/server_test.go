@@ -58,7 +58,7 @@ func TestServerRendersTUIOverPTY(t *testing.T) {
 	}
 
 	output := waitForOutput(t, stdout, "KOTOBA BEACH")
-	for _, want := range []string{"SURF RUN", "goal    catch the kana wave", "sound", "[ keys _"} {
+	for _, want := range []string{"KOTOBA BEACH", "goal    catch the kana wave", "target", "meaning", "sound", "[ keys _"} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("TUI output missing %q:\n%s", want, output)
 		}

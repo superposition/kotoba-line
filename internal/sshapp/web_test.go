@@ -24,7 +24,7 @@ func TestHTTPLoginRendersGameplay(t *testing.T) {
 		t.Fatalf("GET /play status = %d, want 200", rr.Code)
 	}
 	body := rr.Body.String()
-	for _, want := range []string{"KOTOBA BEACH", "logohere", "SURF RUN", "sound", "[ keys _"} {
+	for _, want := range []string{"KOTOBA BEACH", "logohere", "goal    catch the kana wave", "target", "meaning", "sound", "[ keys _"} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("play body missing %q:\n%s", want, body)
 		}
@@ -94,7 +94,7 @@ func TestHTTPKeyEndpointRejectsWrongLetterAndAdvancesCorrectLetter(t *testing.T)
 	}
 
 	response := postKeyHTTP(t, handler, cookie, wrong)
-	if !strings.Contains(response.Screen, "target!") || !strings.Contains(response.Screen, "sound!") || !strings.Contains(response.Screen, "wipeout "+strings.ToUpper(wrong)) {
+	if !strings.Contains(response.Screen, "target") || !strings.Contains(response.Screen, "sound") || !strings.Contains(response.Screen, "feedback wipeout "+strings.ToUpper(wrong)) {
 		t.Fatalf("wrong key response missing red target/sound feedback:\n%s", response.Screen)
 	}
 	if strings.Contains(response.Screen, "[ keys "+wrong+"_") {
