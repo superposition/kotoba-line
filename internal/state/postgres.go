@@ -5,9 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+var postgresPools sync.Map
 
 type PostgresEventStore struct {
 	dsn      string
@@ -38,7 +41,6 @@ func (s PostgresEventStore) TouchUser() error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
 	return touchPostgresUser(db, s.username)
 }
 
@@ -47,7 +49,6 @@ func (s PostgresEventStore) UserRecord() (UserRecord, error) {
 	if err != nil {
 		return UserRecord{}, err
 	}
-	defer db.Close()
 	if err := touchPostgresUser(db, s.username); err != nil {
 		return UserRecord{}, err
 	}
@@ -72,7 +73,6 @@ func (s PostgresEventStore) Append(event Event) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -101,7 +101,6 @@ func (s PostgresEventStore) ReadAll() ([]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
 
 	rows, err := db.Query(`
 		SELECT type, card_id, level_id, boss_id, hint_id, clean, points_delta, reason
@@ -151,7 +150,6 @@ func (s PostgresEventStore) EventCount() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer db.Close()
 
 	var count int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM events WHERE username = $1`, s.username).Scan(&count); err != nil {
@@ -168,6 +166,10 @@ func (s PostgresEventStore) open() (*sql.DB, error) {
 		return nil, errors.New("postgres username is empty")
 	}
 
+	if cached, ok := postgresPools.Load(s.dsn); ok {
+		return cached.(*sql.DB), nil
+	}
+
 	db, err := sql.Open("pgx", s.dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open postgres state: %w", err)
@@ -177,6 +179,10 @@ func (s PostgresEventStore) open() (*sql.DB, error) {
 	if err := migratePostgres(db); err != nil {
 		db.Close()
 		return nil, err
+	}
+	if cached, loaded := postgresPools.LoadOrStore(s.dsn, db); loaded {
+		db.Close()
+		return cached.(*sql.DB), nil
 	}
 	return db, nil
 }

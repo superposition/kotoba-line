@@ -114,6 +114,7 @@ type Model struct {
 	loadErr    string
 	logErr     string
 	eventLog   statestore.EventStore
+	progressCache statestore.Progress
 }
 
 func New(opts Options) Model {
@@ -187,6 +188,7 @@ func New(opts Options) Model {
 		loadErr:   loadErr,
 		logErr:    logErr,
 		eventLog:  eventLog,
+		progressCache: progress,
 	}
 	if model.drill.DeckSize() == 0 && loadErr == "" {
 		model = model.openStations()
@@ -813,6 +815,10 @@ func (m *Model) appendEvent(event statestore.Event) {
 		return
 	}
 	if err := m.eventLog.Append(event); err != nil {
+		m.logErr = err.Error()
+		return
+	}
+	if err := m.progressCache.Apply(event); err != nil {
 		m.logErr = err.Error()
 	}
 }
@@ -2884,14 +2890,10 @@ func (m Model) campaignTitleForLevel(levelID string) string {
 }
 
 func (m Model) progress() statestore.Progress {
-	if m.eventLog == nil || m.eventLog.Path() == "" {
+	if m.progressCache.Cards == nil || m.progressCache.UnlockedLevels == nil {
 		return statestore.NewProgress()
 	}
-	progress, err := m.eventLog.Replay()
-	if err != nil {
-		return statestore.NewProgress()
-	}
-	return progress
+	return m.progressCache
 }
 
 func levelComplete(library *content.Library, levelID string, progress statestore.Progress) bool {
